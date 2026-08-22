@@ -1,0 +1,3 @@
+-- BEGIN LEVELUP_NG_WB DOFILE
+dofile("B738.tablet_levelup_ng_wb_adapter.lua")
+-- END LEVELUP_NG_WB DOFILE

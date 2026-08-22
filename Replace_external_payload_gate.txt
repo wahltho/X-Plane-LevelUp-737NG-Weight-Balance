@@ -1,0 +1,6 @@
+	-- BEGIN LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE
+	if B738_levelup_ng_wb_adapter.owns_payload() then
+		sam_tick = 0
+	elseif B738DR_ext_payload == 0 then
+		sam_tick = 0
+	-- END LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE

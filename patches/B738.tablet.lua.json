@@ -1,0 +1,71 @@
+{
+  "format": "exact-text-replacements-v1",
+  "replacements": [
+    {
+      "name": "LevelUp W&B adapter loader",
+      "oldLines": [
+        "jit.off()"
+      ],
+      "newLines": [
+        "jit.off()",
+        "-- BEGIN LEVELUP_NG_WB DOFILE",
+        "dofile(\"B738.tablet_levelup_ng_wb_adapter.lua\")",
+        "-- END LEVELUP_NG_WB DOFILE"
+      ]
+    },
+    {
+      "name": "LevelUp W&B external payload ownership gate",
+      "oldLines": [
+        "\tif B738DR_ext_payload == 0 then",
+        "\t\tsam_tick = 0"
+      ],
+      "newLines": [
+        "\t-- BEGIN LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE",
+        "\tif B738_levelup_ng_wb_adapter.owns_payload() then",
+        "\t\tsam_tick = 0",
+        "\telseif B738DR_ext_payload == 0 then",
+        "\t\tsam_tick = 0",
+        "\t-- END LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE"
+      ]
+    },
+    {
+      "name": "LevelUp W&B internal payload ownership gate",
+      "oldLines": [
+        "\tif B738DR_ext_payload == 0 then",
+        "\t\tlocal add_weight = 0"
+      ],
+      "newLines": [
+        "\t-- BEGIN LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE",
+        "\tif B738DR_ext_payload == 0 and not B738_levelup_ng_wb_adapter.owns_payload() then",
+        "\t-- END LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE",
+        "\t\tlocal add_weight = 0"
+      ]
+    },
+    {
+      "name": "LevelUp W&B aggregate payload scalar gate",
+      "oldLines": [
+        "\t\t\t\tsimDR_payload_weight = full_crew_weight"
+      ],
+      "newLines": [
+        "\t\t\t-- BEGIN LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE",
+        "\t\t\tif not B738_levelup_ng_wb_adapter.owns_payload() then",
+        "\t\t\t\tsimDR_payload_weight = full_crew_weight",
+        "\t\t\tend",
+        "\t\t\t-- END LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE"
+      ]
+    },
+    {
+      "name": "LevelUp W&B post-definition install hook",
+      "oldLines": [
+        "-- -- dofile(\"\")"
+      ],
+      "newLines": [
+        "-- -- dofile(\"\")",
+        "",
+        "-- BEGIN LEVELUP_NG_WB INSTALL",
+        "B738_levelup_ng_wb_adapter.install()",
+        "-- END LEVELUP_NG_WB INSTALL"
+      ]
+    }
+  ]
+}

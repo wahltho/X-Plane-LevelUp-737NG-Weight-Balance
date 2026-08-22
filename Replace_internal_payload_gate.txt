@@ -1,0 +1,3 @@
+	-- BEGIN LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE
+	if B738DR_ext_payload == 0 and not B738_levelup_ng_wb_adapter.owns_payload() then
+	-- END LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE

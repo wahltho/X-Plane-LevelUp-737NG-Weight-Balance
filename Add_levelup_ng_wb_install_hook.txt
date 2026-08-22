@@ -1,0 +1,3 @@
+-- BEGIN LEVELUP_NG_WB INSTALL
+B738_levelup_ng_wb_adapter.install()
+-- END LEVELUP_NG_WB INSTALL

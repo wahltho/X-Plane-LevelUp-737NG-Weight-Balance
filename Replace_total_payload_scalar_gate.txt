@@ -1,0 +1,5 @@
+			-- BEGIN LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE
+			if not B738_levelup_ng_wb_adapter.owns_payload() then
+				simDR_payload_weight = full_crew_weight
+			end
+			-- END LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE

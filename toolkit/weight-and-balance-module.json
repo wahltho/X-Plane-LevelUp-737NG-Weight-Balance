@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "manifestType": "levelup-compatibility-module-source",
+  "moduleId": "weight-and-balance",
+  "moduleVersion": "0.3.0",
+  "displayName": "LevelUp 737NG Weight and Balance",
+  "description": "Variant-specific X-Plane station ownership, current and predicted CG, FMC CG and takeoff-trim integration.",
+  "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
+  "supportedProducts": [
+    "levelup-737ng"
+  ],
+  "supportedUpstreamReleases": [
+    "LevelUp V2.S1.51",
+    "Zibo 4.05.35 embedded Lua/plugin baseline"
+  ],
+  "supportedVariants": [
+    {
+      "variantId": 2,
+      "acf": "737_70NG.acf",
+      "model": "737-700"
+    },
+    {
+      "variantId": 0,
+      "acf": "737_80NG.acf",
+      "model": "737-800"
+    },
+    {
+      "variantId": 1,
+      "acf": "737_90NG.acf",
+      "model": "737-900"
+    },
+    {
+      "variantId": 4,
+      "acf": "737_9ENG.acf",
+      "model": "737-900ER"
+    }
+  ],
+  "policyHint": "recommended",
+  "defaultEnabledHint": true,
+  "installationOrderHint": 40,
+  "requires": [],
+  "conflictsWith": [],
+  "payloads": [
+    {
+      "path": "patches/B738.tablet.lua.json",
+      "size": 2098,
+      "sha256": "18e30828e8f6a49ca85652fdd4b35307c86d3fe820564f1d5c1842bc07776c17"
+    },
+    {
+      "path": "B738.tablet_levelup_ng_wb_data.lua",
+      "size": 7893,
+      "sha256": "076cdc082d8266b7af97d31ad27c7e8d0e204ed75275b16f5b7b8328ea25ec15"
+    },
+    {
+      "path": "B738.tablet_levelup_ng_wb_core.lua",
+      "size": 6502,
+      "sha256": "d045e11d39734a3c6e0c583c0df1116b4395def0065aafb30c0c51f10df9a320"
+    },
+    {
+      "path": "B738.tablet_levelup_ng_wb_adapter.lua",
+      "size": 9482,
+      "sha256": "49c9f1c9c447feed6308f66a6ae69a77da347959b6c6db92cbb3b22cf15d6ae9"
+    },
+    {
+      "path": "contracts/levelup-ng-wb-acf-v0.3.0.json",
+      "size": 11713,
+      "sha256": "4595c314325a782c077d08efc53bfa10ebcd0f8b35db602fa7fdc246dbb9ddce"
+    }
+  ],
+  "targets": [
+    {
+      "operation": "exact-text-replacements-v1",
+      "payload": "patches/B738.tablet.lua.json",
+      "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
+    },
+    {
+      "operation": "copy-file-v1",
+      "payload": "B738.tablet_levelup_ng_wb_data.lua",
+      "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
+      "resultSha256": "076cdc082d8266b7af97d31ad27c7e8d0e204ed75275b16f5b7b8328ea25ec15"
+    },
+    {
+      "operation": "copy-file-v1",
+      "payload": "B738.tablet_levelup_ng_wb_core.lua",
+      "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_core.lua",
+      "resultSha256": "d045e11d39734a3c6e0c583c0df1116b4395def0065aafb30c0c51f10df9a320"
+    },
+    {
+      "operation": "copy-file-v1",
+      "payload": "B738.tablet_levelup_ng_wb_adapter.lua",
+      "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_adapter.lua",
+      "resultSha256": "49c9f1c9c447feed6308f66a6ae69a77da347959b6c6db92cbb3b22cf15d6ae9"
+    }
+  ],
+  "acfContract": {
+    "path": "contracts/levelup-ng-wb-acf-v0.3.0.json",
+    "size": 11713,
+    "sha256": "4595c314325a782c077d08efc53bfa10ebcd0f8b35db602fa7fdc246dbb9ddce"
+  },
+  "toolkitIntegration": {
+    "transactionModel": "LevelUp compatibility package schema 3",
+    "directCatalogEntry": false,
+    "reason": "This repository is the canonical module source. End users receive it through the consolidated LevelUp compatibility package.",
+    "openRequirement": "The Toolkit must validate the semantic ACF contract before enabling the module; whole-file ACF hashes are intentionally insufficient."
+  }
+}

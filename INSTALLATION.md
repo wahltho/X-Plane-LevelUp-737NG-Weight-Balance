@@ -1,0 +1,96 @@
+# Installation guide
+
+## Requirements
+
+- LevelUp 737NG Series using upstream Zibo 4.05.35 Tablet Lua and the
+  unmodified upstream `zibomod.xpl`.
+- `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` matching
+  `levelup700-wb-v1`, `levelup800-wb-v2`, `levelup900-wb-v1` and
+  `levelup900er-wb-v1`. Unrelated flight-model changes are allowed.
+- Python 3. No compiler or plugin build is required.
+
+The reference ACF SHA-256 values are recorded in `SOURCE.md`. They establish
+provenance only; installation is controlled by the individual consumed W&B
+fields, not the whole-file hash. The role category is intentionally excluded
+from the gate so that the current -900ER ACF and Jochen's announced correction
+of its Galley F/A roles are both accepted.
+
+## Install or upgrade
+
+1. Close X-Plane.
+2. Back up the LevelUp test aircraft.
+3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
+4. Extract every file from
+   `LevelUp-737NG-Weight-Balance-v0.3.0.zip` directly into that folder. Do not
+   create another subfolder.
+5. Run one of:
+
+   ```text
+   py z_Install_LevelUp_NG_WB.py
+   python z_Install_LevelUp_NG_WB.py
+   python3 z_Install_LevelUp_NG_WB.py
+   ```
+
+The installer must report:
+
+- package payload `v0.3.0` verified;
+- all four ACF contracts verified;
+- Lua syntax passed when `luac` is available;
+- LevelUp 737NG W&B hooks installed.
+
+For an aircraft root outside the normal four-parent layout, use:
+
+```text
+python3 z_Install_LevelUp_NG_WB.py --aircraft-root "/path/to/LU 737NG Series"
+```
+
+A fresh install creates `B738.tablet.lua.levelupngwb.backup` once. An upgrade
+from the -700-only v0.1.x package keeps
+`B738.tablet.lua.levelup700wb.backup` unchanged and migrates the old five
+marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
+required after installing or upgrading.
+
+For an existing v0.2.0 through v0.2.3 installation, extract v0.3.0 over
+the same Tablet folder and run the installer normally. Do not uninstall first.
+The five common hooks are unchanged. The package verifies all four current ACF
+contracts before reporting that the hooks are already in the requested state.
+
+The v0.2.3 Windows `luac.exe` temporary-file fix remains included.
+
+The installer tolerates other marked compatibility patches and both LF and
+CRLF line endings. It refuses an unsupported stock Tablet structure or a
+changed W&B field rather than guessing a source edit.
+
+## Capacity boundary
+
+The ACF station maxima are authoritative. Rounded stock Tablet cargo values
+are normalized to the exact active ACF maximum before any station or CG write:
+
+- -700 Cargo 1/2 differ from the stock Tablet ceiling by `21.912 / 42.213 kg`.
+- -800 and -900 Cargo 1/2 differ by `0.207 / 1.098 kg`.
+- -900ER Cargo 1/2 differ by `0.207 / 87.280 kg`.
+- -800 Galley F/A combined with half the cabin crew can exceed the `3000-lb`
+  ACF station maximum by `24.823 / 72.823 kg` at the extreme Tablet entries.
+
+Cargo normalization preserves the requested total whenever the two cargo
+stations have enough combined capacity. A service-station excess invalidates
+the complete target instead of silently dropping cabin crew or catering mass.
+
+## Remove
+
+Close X-Plane and run from the same Tablet folder:
+
+```text
+python3 z_Install_LevelUp_NG_WB.py --uninstall
+```
+
+This removes only the five common W&B blocks and restores the stock payload
+gates. It preserves other compatibility patches and both possible backup
+files. Package files can then be deleted manually.
+
+## First simulator evidence
+
+Follow `RUNTIME_TEST_PLAN.md`. At minimum record all nine `m_stations`,
+`m_fixed`, three fuel tanks, X-Plane current/ZFW offsets and `%MAC`, EFB
+current/ZFW/TOW/LW CG, `calc_to_cg`, FMC CG and takeoff trim. Matching displays
+alone are not proof that station and fuel ownership agree.
