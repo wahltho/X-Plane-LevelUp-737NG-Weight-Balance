@@ -3,7 +3,7 @@
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
 `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl` and Tablet Lua. Release `v0.3.0`
+unmodified upstream Zibo 4.05.35 `zibomod.xpl` and Tablet Lua. Release `v0.3.1`
 supports Variant-IDs `2/0/1/4` (`737-700/-800/-900/-900ER`) from one package.
 The -600, every MAX variant and stock Zibo delegate to the original Tablet
 functions.
@@ -13,15 +13,16 @@ The initial standalone repository import is derived from the committed
 Future public LevelUp W&B patch development belongs here; the private C++ port
 remains owned by the Zibo Mod repository.
 
-`v0.3.0` supersedes the -700-only `v0.1.4` and common
+`v0.3.1` supersedes the -700-only `v0.1.4` and common
 `v0.2.0`/`v0.2.1`/`v0.2.2`/`v0.2.3`
 packages. The installer migrates the five old `LEVELUP_700_WB` blocks in place,
 preserves the original v0.1.x backup and installs the common adapter only after
 all stock Tablet functions are defined. Existing v0.2.x hooks remain valid;
 v0.2.2 synchronized provenance with Jochen's final 700/800 V2.S1.51 inputs.
 Release v0.2.3 fixed the Windows `luac.exe` temporary-file handoff. Release
-v0.3.0 adds Jochen's -900/-900ER contracts, mass-dependent -900ER main-tank
-arms and exact per-variant cargo normalization. The loader remains directly
+v0.3.0 added Jochen's first -900/-900ER contracts and exact per-variant cargo
+normalization. v0.3.1 follows the refined 2026-08-22 -900/-900ER station and
+tank geometry; both variants now use fixed `69 / 62 / 69 ft` tank arms. The loader remains directly
 after `jit.off()`; it never assigns the discarded XLua `dofile()` return value.
 
 ## Owner contract
@@ -53,13 +54,12 @@ checksum.
 |---|---:|---|---:|---:|
 | 737-700 | 2 | `levelup700-wb-v1` | `82999.61 / 154499.9 lb` | `14.992128372 ft` |
 | 737-800 | 0 | `levelup800-wb-v2` | `91514.04 / 174700 lb` | `14.992127419 ft` |
-| 737-900 | 1 | `levelup900-wb-v1` | `94580 / 174700 lb` | `14.993530273 ft` |
-| 737-900ER | 4 | `levelup900er-wb-v1` | `98495 / 187699.31 lb` | `14.993530273 ft` |
+| 737-900 | 1 | `levelup900-wb-v2` | `94580 / 174700 lb` | `14.993530273 ft` |
+| 737-900ER | 4 | `levelup900er-wb-v2` | `98495 / 187699.31 lb` | `14.993530273 ft` |
 
 All four contracts contain two cargo stations, five passenger zones and two
-service/cabin-crew stations. The -900 uses `70 / 62 / 70 ft` constant tank
-arms. The -900ER uses `70 / 62 / 70 ft` empty and `69 / 62 / 69 ft` full;
-its main-tank moment therefore interpolates with the actual tank mass.
+service/cabin-crew stations. The refined -900 and -900ER contracts both use
+`69 / 62 / 69 ft` constant tank arms.
 
 The ACF remains authoritative at capacity boundaries. Rounded stock Tablet
 cargo selections are normalized to the exact active ACF maxima before the EFB,
@@ -71,8 +71,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.3.0.zip`
-- `LevelUp-737NG-Weight-Balance-v0.3.0.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.3.1.zip`
+- `LevelUp-737NG-Weight-Balance-v0.3.1.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:
@@ -122,7 +122,7 @@ of this module together with the other LevelUp compatibility modules.
 The source handoff is machine-readable:
 
 - `patches/B738.tablet.lua.json` contains the five structural Tablet changes;
-- `contracts/levelup-ng-wb-acf-v0.3.0.json` contains the semantic ACF fields
+- `contracts/levelup-ng-wb-acf-v0.3.1.json` contains the semantic ACF fields
   required by the four supported variants;
 - `toolkit/weight-and-balance-module.json` binds payload hashes, target paths,
   variant IDs and the intended schema-3 operations.

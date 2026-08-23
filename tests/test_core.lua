@@ -39,8 +39,8 @@ local z900, mass900, moment900 = core.cg_z(
     data900.empty_mass_kg, data900.empty_cg_z_m, station_masses, data900.stations, fuel_masses, data900.tanks
 )
 near(mass900, 62750.766354600004, 1e-9, "900 gross mass")
-near(moment900, 1225916.149216837, 1e-6, "900 gross moment")
-near(z900, 19.53627374507706, 1e-12, "900 cg z")
+near(moment900, 1221283.189216837, 1e-6, "900 gross moment")
+near(z900, 19.462442614891023, 1e-12, "900 cg z")
 
 local data900er = contracts[4]
 local z900er, mass900er, moment900er = core.cg_z(
@@ -48,10 +48,10 @@ local z900er, mass900er, moment900er = core.cg_z(
     fuel_masses, data900er.tanks
 )
 near(mass900er, 64526.58048315, 1e-9, "900ER gross mass")
-near(moment900er, 1269754.2588752897, 1e-6, "900ER gross moment")
-near(z900er, 19.678003225459374, 1e-12, "900ER cg z")
+near(moment900er, 1266353.0387007336, 1e-6, "900ER gross moment")
+near(z900er, 19.62529285170194, 1e-12, "900ER cg z")
 near(core.tank_arm(data900er.tanks[1], data900er.tanks[1].max_kg * 0.5),
-    69.5 * 0.3048, 1e-12, "900ER half-full main arm")
+    69.0 * 0.3048, 1e-12, "900ER half-full main arm")
 
 -- X-Plane's cg_offset_z values share an offset datum with each other, but not
 -- the ACF's absolute station coordinates. Derive an ACF-space LEMAC through
@@ -123,4 +123,4 @@ near(aft800, 31.705880339220826, 1e-12, "800 fixed aft limit")
 assert(core.within_fixed_envelope(70000, 20, data800, 17.4))
 assert(not core.within_fixed_envelope(80000, 20, data800, 17.4))
 
-print("PASS: 700/800/900/900ER stations, independent mass/moment, variable fuel arms, taxi and fixed envelopes")
+print("PASS: 700/800/900/900ER stations, independent mass/moment, ACF fuel arms, taxi and fixed envelopes")

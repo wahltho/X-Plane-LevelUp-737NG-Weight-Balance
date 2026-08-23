@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.0.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.1.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -34,10 +34,11 @@ EXPECTED = {
     "OWNER_CLOSURE.md",
     "RUNTIME_TEST_PLAN.md",
     "ACF_RECONCILE_2026_08_22.md",
+    "ACF_RECONCILE_2026_08_23.md",
     "CHANGELOG.md",
     "LICENSE",
     "patches/B738.tablet.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.3.0.json",
+    "contracts/levelup-ng-wb-acf-v0.3.1.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -84,10 +85,10 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         assert completed.returncode == 0, completed.stdout + completed.stderr
         assert "Verified levelup700-wb-v1" in completed.stdout
         assert "Verified levelup800-wb-v2" in completed.stdout
-        assert "Verified levelup900-wb-v1" in completed.stdout
-        assert "Verified levelup900er-wb-v1" in completed.stdout
+        assert "Verified levelup900-wb-v2" in completed.stdout
+        assert "Verified levelup900er-wb-v2" in completed.stdout
         installed = (tablet / "B738.tablet.lua").read_bytes()
         assert installed.count(b"BEGIN LEVELUP_NG_WB") == 5
         assert b"BEGIN LEVELUP_700_WB" not in installed
 
-print("PASS: v0.3.0 entries, checksum, source identity and fresh four-contract installation")
+print("PASS: v0.3.1 entries, checksum, source identity and fresh four-contract installation")

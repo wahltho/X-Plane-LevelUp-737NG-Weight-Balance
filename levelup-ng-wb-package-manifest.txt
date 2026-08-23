@@ -1,5 +1,5 @@
 package|id|levelup-737ng-weight-balance-test-balloon
-package|version|v0.3.0
+package|version|v0.3.1
 package|repository|https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance
 target|script|B738.tablet.lua
 target|baseline|Zibo 4.05.35
@@ -13,13 +13,13 @@ target|acf_contract|levelup700-wb-v1
 target|reference_acf_sha256|8cb0d7254e63cd1a2b4fe88071e706393504e6bfce7ab6af3cca417d22ea3c31
 target|variant_id|1
 target|acf|737_90NG.acf
-target|acf_contract|levelup900-wb-v1
-target|reference_acf_sha256|b736f745bf0f170e598ad896a8e055533107742478624e32239975194895d071
+target|acf_contract|levelup900-wb-v2
+target|reference_acf_sha256|4b4ec0617e7aa1786be362e9cfe1ab60d92ba1b097e8145e896d31f835f842e9
 target|variant_id|4
 target|acf|737_9ENG.acf
-target|acf_contract|levelup900er-wb-v1
-target|reference_acf_sha256|67256a2181435da50b0f31f2c0ebbf81732e530c7b3809de05967abf0930eec6
-payload|file|B738.tablet_levelup_ng_wb_data.lua|size|7893|sha256|076cdc082d8266b7af97d31ad27c7e8d0e204ed75275b16f5b7b8328ea25ec15
+target|acf_contract|levelup900er-wb-v2
+target|reference_acf_sha256|c2c0db2907904fb50fbd281f96d46c90e1191f002ed360bcaed778ba106cfed2
+payload|file|B738.tablet_levelup_ng_wb_data.lua|size|7893|sha256|6fffc8f8949b30062a1e9a6e3adc21487a4a810f44598564ab8d1d3e09006421
 payload|file|B738.tablet_levelup_ng_wb_core.lua|size|6502|sha256|d045e11d39734a3c6e0c583c0df1116b4395def0065aafb30c0c51f10df9a320
 payload|file|B738.tablet_levelup_ng_wb_adapter.lua|size|9482|sha256|49c9f1c9c447feed6308f66a6ae69a77da347959b6c6db92cbb3b22cf15d6ae9
 payload|file|Add_levelup_ng_wb_dofile.txt|size|106|sha256|ef25773f03c23b8cbd19336760c22c4c77d7f1e60561be2790e5857cd8ec7b6a
@@ -27,7 +27,7 @@ payload|file|Add_levelup_ng_wb_install_hook.txt|size|97|sha256|d75308648cee6bb12
 payload|file|Replace_external_payload_gate.txt|size|208|sha256|3396b2abc8a97f360c70d0995c2019a818573f5283af37f0abd43aaa7599e909
 payload|file|Replace_internal_payload_gate.txt|size|173|sha256|44cba15cdde5bae2c02f951d118d97ad04e9729453e7af23ed40bec981f2885c
 payload|file|Replace_total_payload_scalar_gate.txt|size|210|sha256|0481d57d32e5b0488ab4c3068d9baa3f39188cc2d1ce4bf981d816473a90364b
-payload|file|z_Install_LevelUp_NG_WB.py|size|18839|sha256|4c6e56968bd90e855a4eae703874df0dc5abca4a22b063179ae61dd5dc75180e
+payload|file|z_Install_LevelUp_NG_WB.py|size|18839|sha256|33b8bb5ba8ff011a9a2366857bfa7292eb742032734840bddc20ddb6e6f7195b
 payload|file|patches/B738.tablet.lua.json|size|2098|sha256|18e30828e8f6a49ca85652fdd4b35307c86d3fe820564f1d5c1842bc07776c17
-payload|file|contracts/levelup-ng-wb-acf-v0.3.0.json|size|11713|sha256|4595c314325a782c077d08efc53bfa10ebcd0f8b35db602fa7fdc246dbb9ddce
-payload|file|toolkit/weight-and-balance-module.json|size|3629|sha256|f638852a4813880c9c394c68bf97e71cceab9a2d537daab5643b200179bbdef5
+payload|file|contracts/levelup-ng-wb-acf-v0.3.1.json|size|11713|sha256|6df645aed296fa2675da0310708ebcf5d1a56924c8bc2e224c21deeb0bdd10c3
+payload|file|toolkit/weight-and-balance-module.json|size|3629|sha256|f09acd4ffd189f4f76d131df1a6910d98a803542ca486a070f4aca6d5c36bb1c

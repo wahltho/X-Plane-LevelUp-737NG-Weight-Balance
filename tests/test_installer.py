@@ -167,12 +167,12 @@ def exercise(line_ending: bytes, performance_blocks: bool) -> None:
         original = target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.3.0" in first.stdout
-        assert "Verified package payload: v0.3.0" in first.stdout
+        assert "Installed v0.3.1" in first.stdout
+        assert "Verified package payload: v0.3.1" in first.stdout
         assert "Verified levelup700-wb-v1" in first.stdout
         assert "Verified levelup800-wb-v2" in first.stdout
-        assert "Verified levelup900-wb-v1" in first.stdout
-        assert "Verified levelup900er-wb-v1" in first.stdout
+        assert "Verified levelup900-wb-v2" in first.stdout
+        assert "Verified levelup900er-wb-v2" in first.stdout
         installed = target.read_bytes()
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == original
         for marker in (
@@ -230,7 +230,7 @@ def exercise_station_role_tolerance() -> None:
         replace_acf_field(acf, "acf/_fixed_role/7", "0")
         replace_acf_field(acf, "acf/_fixed_role/8", "0")
         result = run(folder)
-        assert "Verified levelup900er-wb-v1" in result.stdout
+        assert "Verified levelup900er-wb-v2" in result.stdout
     finally:
         temporary.cleanup()
 
@@ -298,7 +298,7 @@ def exercise_v014_upgrade() -> None:
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
         result = run(folder)
-        assert "Installed v0.3.0" in result.stdout
+        assert "Installed v0.3.1" in result.stdout
         upgraded = target.read_text(encoding="utf-8")
         assert "LEVELUP_700_WB" not in upgraded
         assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
@@ -346,7 +346,7 @@ def exercise_v020_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.0" in result.stdout
+        assert "Verified package payload: v0.3.1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
         assert "already in the requested state" in result.stdout
         assert target.read_bytes() == installed_v020
@@ -405,7 +405,7 @@ def exercise_v021_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.0" in result.stdout
+        assert "Verified package payload: v0.3.1" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
         assert "already in the requested state" in result.stdout
@@ -433,7 +433,7 @@ def exercise_v022_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.0" in result.stdout
+        assert "Verified package payload: v0.3.1" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
         assert "already in the requested state" in result.stdout
@@ -457,6 +457,6 @@ exercise_non_wb_acf_change()
 exercise_station_role_tolerance()
 exercise_wrong_acf("737_70NG.acf", "levelup700-wb-v1")
 exercise_wrong_acf("737_80NG.acf", "levelup800-wb-v2")
-exercise_wrong_acf("737_90NG.acf", "levelup900-wb-v1")
-exercise_wrong_acf("737_9ENG.acf", "levelup900er-wb-v1")
+exercise_wrong_acf("737_90NG.acf", "levelup900-wb-v2")
+exercise_wrong_acf("737_9ENG.acf", "levelup900er-wb-v2")
 print("PASS: Windows luac handoff, .35 anchors, legacy migration, four ACF contracts, LF/CRLF, idempotence, uninstall and coexistence")

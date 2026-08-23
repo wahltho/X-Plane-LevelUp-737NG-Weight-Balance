@@ -19,7 +19,7 @@ Capture for every case:
 Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all four ACF contracts pass the v0.3.0 installer. A whole-file hash may
+1. Confirm all four ACF contracts pass the v0.3.1 installer. A whole-file hash may
    differ after unrelated flight-model tuning.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
@@ -52,9 +52,9 @@ Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 1. Exercise direct transitions `2 -> 0 -> 1 -> 4 -> 2`. Before publication,
    the prior calibrated LEMAC must be invalidated and predictions must converge
    to the newly selected contract.
-2. On the -900ER, compare empty, half-full and full main tanks. Verify the
-   captured moment follows the ACF's `70 -> 69 ft` arm interpolation and that
-   TOW/LW predictions use the same arm rule.
+2. On the -900 and -900ER, compare empty, half-full and full main tanks. Verify
+   the captured moment follows the ACF's constant `69 ft` main-tank arms and
+   that TOW/LW predictions use the same arm rule.
 3. Load a LevelUp ID 3 aircraft. The patch must relinquish all payload, CG and
    envelope ownership and preserve stock behavior.
 4. Load stock Zibo 737-800. Confirm no LevelUp station writer, current-CG
@@ -62,7 +62,7 @@ Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 5. Repeat representative cases with the performance patch installed before
    and after this W&B package.
 6. Upgrade an aircraft with -700 v0.1.4 installed. Verify the original backup
-   remains unchanged, only five common v0.3.0 blocks remain, and all four
+   remains unchanged, only five common v0.3.1 blocks remain, and all four
    supported variants load.
 7. Upgrade an aircraft with v0.2.0 installed and Jochen's revised 800 ACF.
    Verify the common hooks remain singletons, the 800 v2 contract is active,

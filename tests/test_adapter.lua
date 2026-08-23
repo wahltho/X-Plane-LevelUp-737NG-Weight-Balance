@@ -48,10 +48,10 @@ local literal = {
         lemac = 18.4,
         fwd = 63.380001068 * FT_TO_M,
         aft = 67.129997253 * FT_TO_M,
-        station_arms = { 43, 97, 35, 48.5, 66, 79, 92, 15, 108 },
+        station_arms = { 45, 89, 34, 47.5, 65, 77, 91, 15, 108 },
         fuel_total = 46062.008,
-        tank_empty = { 70, 62, 70 },
-        tank_full = { 70, 62, 70 },
+        tank_empty = { 69, 62, 69 },
+        tank_full = { 69, 62, 69 },
         takeoff_fuel = { 3907.061320612218, 1959.077358775564, 3907.061320612218 },
     },
     [2] = {
@@ -74,9 +74,9 @@ local literal = {
         lemac = 18.6,
         fwd = 64.879997253 * FT_TO_M,
         aft = 67.879997253 * FT_TO_M,
-        station_arms = { 43, 97, 35, 48.5, 66, 79, 92, 15, 108 },
+        station_arms = { 45, 89, 34, 47.5, 65, 77, 91, 15, 108 },
         fuel_total = 52512.31,
-        tank_empty = { 70, 62, 70 },
+        tank_empty = { 69, 62, 69 },
         tank_full = { 69, 62, 69 },
         takeoff_fuel = { 4454.187391418068, 864.8252171638644, 4454.187391418068 },
     },
@@ -255,6 +255,13 @@ B738DR_b737_variant = 4
 B738DR_ext_payload = 0
 zone_cargo1 = 3560
 zone_cargo2 = 4850
+zone1_pax = { 1, 0, 0 }
+zone2_pax = { 1, 0, 0 }
+zone3_pax = { 1, 0, 0 }
+zone4_pax = { 1, 0, 0 }
+zone5_pax = { 42, 0, 0 }
+B738DR_galley_fwd_kg = 1
+B738DR_galley_aft_kg = 1000
 for index = 0, 8 do simDR_payload_stations[index] = 0 end
 establish_xplane_reference(4, empty_stations)
 adapter.frame_update()
@@ -265,6 +272,13 @@ assert(B738DR_calc_to_cg == 0,
 for index = 0, 8 do assert(simDR_payload_stations[index] > 0, "normalized targets must slow-load") end
 zone_cargo1 = 1000
 zone_cargo2 = 500
+zone1_pax = { 10, 2, 1 }
+zone2_pax = { 12, 1, 0 }
+zone3_pax = { 14, 0, 1 }
+zone4_pax = { 3, 0, 0 }
+zone5_pax = { 9, 1, 1 }
+B738DR_galley_fwd_kg = 100
+B738DR_galley_aft_kg = 125
 
 zfw_offset_value = 100
 adapter.frame_update()
@@ -272,4 +286,4 @@ assert(B738DR_calc_to_cg == 0, "invalid X-Plane datum must suppress FMC CG inste
 
 B738DR_b737_variant = 3
 assert(check_tow(1, 1) == "stock_tow", "variant switch must relinquish envelope ownership")
-print("PASS: -700/-800/-900/-900ER owners, variable tank arms, exact cargo limits, external read-only and delegation")
+print("PASS: -700/-800/-900/-900ER owners, ACF tank arms, exact cargo limits, external read-only and delegation")
