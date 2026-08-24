@@ -1,0 +1,39 @@
+{
+  "format": "exact-text-replacements-v1",
+  "replacements": [
+    {
+      "name": "LevelUp W&B FMS ACF empty-weight binding",
+      "oldLines": [
+        "simDR_payload_stations\t\t= find_dataref(\"sim/flightmodel/weight/m_stations\")"
+      ],
+      "newLines": [
+        "simDR_payload_stations\t\t= find_dataref(\"sim/flightmodel/weight/m_stations\")",
+        "-- BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT",
+        "simDR_levelup_ng_acf_m_empty\t= find_dataref(\"sim/aircraft/weight/acf_m_empty\")",
+        "-- END LEVELUP_NG_WB FMS_EMPTY_WEIGHT"
+      ]
+    },
+    {
+      "name": "LevelUp W&B physical-station FMC ZFW owner",
+      "oldLines": [
+        "\tzfw_real = B738DR_oew_kg + simDR_payload_weight - full_crew_weight"
+      ],
+      "newLines": [
+        "\t-- BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER",
+        "\tif B738DR_b737_variant == 0 or B738DR_b737_variant == 1 or B738DR_b737_variant == 2 or B738DR_b737_variant == 4 then",
+        "\t\t-- FIX: LevelUp ACF empty mass already includes the pilots.  The nine",
+        "\t\t-- physical stations are the payload owner, including during slow loading",
+        "\t\t-- and external-payload operation; do not subtract Zibo's inherited 524 kg.",
+        "\t\tlocal station_payload_weight = 0",
+        "\t\tfor station_index = 0, 8 do",
+        "\t\t\tstation_payload_weight = station_payload_weight + math.max(simDR_payload_stations[station_index] or 0, 0)",
+        "\t\tend",
+        "\t\tzfw_real = simDR_levelup_ng_acf_m_empty + station_payload_weight",
+        "\telse",
+        "\t\tzfw_real = B738DR_oew_kg + simDR_payload_weight - full_crew_weight",
+        "\tend",
+        "\t-- END LEVELUP_NG_WB FMS_ZFW_OWNER"
+      ]
+    }
+  ]
+}

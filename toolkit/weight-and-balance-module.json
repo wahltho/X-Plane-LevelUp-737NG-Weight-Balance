@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "manifestType": "levelup-compatibility-module-source",
   "moduleId": "weight-and-balance",
-  "moduleVersion": "0.3.1",
+  "moduleVersion": "0.3.2",
   "displayName": "LevelUp 737NG Weight and Balance",
   "description": "Variant-specific X-Plane station ownership, current and predicted CG, FMC CG and takeoff-trim integration.",
   "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
@@ -47,6 +47,11 @@
       "sha256": "18e30828e8f6a49ca85652fdd4b35307c86d3fe820564f1d5c1842bc07776c17"
     },
     {
+      "path": "patches/B738.a_fms.lua.json",
+      "size": 1701,
+      "sha256": "cfcd366f826da403fa33911328f8e61fe67169067ec741a5eff1b9fb93c5d339"
+    },
+    {
       "path": "B738.tablet_levelup_ng_wb_data.lua",
       "size": 7893,
       "sha256": "6fffc8f8949b30062a1e9a6e3adc21487a4a810f44598564ab8d1d3e09006421"
@@ -62,9 +67,9 @@
       "sha256": "49c9f1c9c447feed6308f66a6ae69a77da347959b6c6db92cbb3b22cf15d6ae9"
     },
     {
-      "path": "contracts/levelup-ng-wb-acf-v0.3.1.json",
+      "path": "contracts/levelup-ng-wb-acf-v0.3.2.json",
       "size": 11713,
-      "sha256": "6df645aed296fa2675da0310708ebcf5d1a56924c8bc2e224c21deeb0bdd10c3"
+      "sha256": "eee713dddf68201a48ab3cb05df0dd63503f70fe3a60f68ab51f5e1e2d62c76c"
     }
   ],
   "targets": [
@@ -72,6 +77,11 @@
       "operation": "exact-text-replacements-v1",
       "payload": "patches/B738.tablet.lua.json",
       "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
+    },
+    {
+      "operation": "exact-text-replacements-v1",
+      "payload": "patches/B738.a_fms.lua.json",
+      "relativePath": "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua"
     },
     {
       "operation": "copy-file-v1",
@@ -93,9 +103,9 @@
     }
   ],
   "acfContract": {
-    "path": "contracts/levelup-ng-wb-acf-v0.3.1.json",
+    "path": "contracts/levelup-ng-wb-acf-v0.3.2.json",
     "size": 11713,
-    "sha256": "6df645aed296fa2675da0310708ebcf5d1a56924c8bc2e224c21deeb0bdd10c3"
+    "sha256": "eee713dddf68201a48ab3cb05df0dd63503f70fe3a60f68ab51f5e1e2d62c76c"
   },
   "toolkitIntegration": {
     "transactionModel": "LevelUp compatibility package schema 3",

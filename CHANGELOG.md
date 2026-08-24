@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.2 - 2026-08-24
+
+- Fixes the approximately `1.155 klb` LevelUp FMC ZFW/GW deficit caused by
+  subtracting Zibo's inherited `524 kg` pilots although LevelUp ACF empty mass
+  already includes them.
+- Uses ACF empty mass plus `m_stations[0..8]` as the FMC ZFW owner for Variant
+  IDs `2/0/1/4`; stock Zibo and unsupported variants keep the upstream formula.
+- Adds structural, marked FMS changes without another FMS `dofile()`, preserving
+  existing VNAV descent-table patches in either installation order.
+- Extends installer rollback, backup, uninstall, LF/CRLF, migration, archive and
+  Toolkit tests across both Tablet and FMS targets.
+- Leaves takeoff trim tables unchanged pending new RealBench evidence.
+
 ## 0.3.1 - 2026-08-23
 
 - Updates the 737-900 and 737-900ER semantic contracts to Jochen Heiden's

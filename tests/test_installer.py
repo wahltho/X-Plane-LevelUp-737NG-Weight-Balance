@@ -15,6 +15,10 @@ BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
     "B738X_XP12_4_05_35/plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
 )
+FMS_BASELINE = Path(
+    "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
+    "B738X_XP12_4_05_35/plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua"
+)
 INSTALLER = PACKAGE / "z_Install_LevelUp_NG_WB.py"
 V020_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.0.zip"
 V021_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.1.zip"
@@ -28,6 +32,8 @@ FILES = (
     "Replace_external_payload_gate.txt",
     "Replace_internal_payload_gate.txt",
     "Replace_total_payload_scalar_gate.txt",
+    "Add_levelup_ng_wb_fms_empty_weight.txt",
+    "Replace_levelup_ng_wb_fms_zfw_owner.txt",
     "levelup-ng-wb-package-manifest.txt",
     "z_Install_LevelUp_NG_WB.py",
 )
@@ -54,7 +60,40 @@ def write_contract_acf(path: Path, contract: dict[str, object]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
-def setup(line_ending: bytes = b"\n", performance_blocks: bool = False) -> tuple[tempfile.TemporaryDirectory, Path]:
+def with_descent_blocks(text: str) -> str:
+    descent_dofile = (
+        "-- BEGIN LEVELUP_VNAV_DESCENT_TABLES DOFILE\n"
+        'dofile("B738.a_fms_levelup_tables.lua")\n'
+        "-- END LEVELUP_VNAV_DESCENT_TABLES DOFILE"
+    )
+    descent_kias = (
+        "\t-- BEGIN LEVELUP_VNAV_DESCENT_TABLES KIAS\n"
+        "\tlocal levelup_test_kias = true\n"
+        "\t-- END LEVELUP_VNAV_DESCENT_TABLES KIAS"
+    )
+    descent_mach = (
+        "\t-- BEGIN LEVELUP_VNAV_DESCENT_TABLES MACH\n"
+        "\tlocal levelup_test_mach = true\n"
+        "\t-- END LEVELUP_VNAV_DESCENT_TABLES MACH"
+    )
+    text = text.replace("jit.off()", "jit.off()\n" + descent_dofile, 1)
+    text = text.replace(
+        "function take_alt_dist(x_idx_alt, x_spd_alt, x_spd_wnd_alt, x_flap)",
+        "function take_alt_dist(x_idx_alt, x_spd_alt, x_spd_wnd_alt, x_flap)\n" + descent_kias,
+        1,
+    )
+    return text.replace(
+        "function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)",
+        "function take_alt_dist_mach(x_idx_alt, x_spd_alt, x_spd_wnd_alt)\n" + descent_mach,
+        1,
+    )
+
+
+def setup(
+    line_ending: bytes = b"\n",
+    performance_blocks: bool = False,
+    descent_blocks: bool = False,
+) -> tuple[tempfile.TemporaryDirectory, Path]:
     temporary = tempfile.TemporaryDirectory()
     aircraft = Path(temporary.name) / "LU 737NG Series"
     folder = aircraft / "plugins/xlua/scripts/B738.tablet"
@@ -79,6 +118,15 @@ def setup(line_ending: bytes = b"\n", performance_blocks: bool = False) -> tuple
         text = text.replace("jit.off()", "jit.off()\n" + perf_dofile, 1)
         text = text.replace("function page_app_rating()", perf_hook + "\nfunction page_app_rating()", 1)
     (folder / "B738.tablet.lua").write_bytes(text.encode("utf-8").replace(b"\n", line_ending))
+
+    fms_folder = aircraft / "plugins/xlua/scripts/B738.a_fms"
+    fms_folder.mkdir(parents=True)
+    fms_text = FMS_BASELINE.read_text(encoding="utf-8")
+    if descent_blocks:
+        fms_text = with_descent_blocks(fms_text)
+    (fms_folder / "B738.a_fms.lua").write_bytes(
+        fms_text.encode("utf-8").replace(b"\n", line_ending)
+    )
     return temporary, folder
 
 
@@ -160,21 +208,25 @@ def exercise_windows_luac_temporary_file_contract() -> None:
         fake_path.parent.rmdir()
 
 
-def exercise(line_ending: bytes, performance_blocks: bool) -> None:
-    temporary, folder = setup(line_ending, performance_blocks)
+def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool = False) -> None:
+    temporary, folder = setup(line_ending, performance_blocks, descent_blocks)
     try:
         target = folder / "B738.tablet.lua"
+        fms_target = folder.parent / "B738.a_fms/B738.a_fms.lua"
         original = target.read_bytes()
+        fms_original = fms_target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.3.1" in first.stdout
-        assert "Verified package payload: v0.3.1" in first.stdout
+        assert "Installed v0.3.2" in first.stdout
+        assert "Verified package payload: v0.3.2" in first.stdout
         assert "Verified levelup700-wb-v1" in first.stdout
         assert "Verified levelup800-wb-v2" in first.stdout
         assert "Verified levelup900-wb-v2" in first.stdout
         assert "Verified levelup900er-wb-v2" in first.stdout
         installed = target.read_bytes()
+        fms_installed = fms_target.read_bytes()
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == original
+        assert (fms_target.parent / "B738.a_fms.lua.levelupngwb.backup").read_bytes() == fms_original
         for marker in (
             b"BEGIN LEVELUP_NG_WB DOFILE", b"BEGIN LEVELUP_NG_WB INSTALL",
             b"BEGIN LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE",
@@ -183,11 +235,21 @@ def exercise(line_ending: bytes, performance_blocks: bool) -> None:
         ):
             assert installed.count(marker) == 1
         assert b"LEVELUP_700_WB" not in installed
+        assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
+        assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        assert b"simDR_levelup_ng_acf_m_empty + station_payload_weight" in fms_installed
+        assert b"for station_index = 0, 8 do" in fms_installed
+        assert b"B738DR_b737_variant == 4" in fms_installed
         if line_ending == b"\r\n":
             assert installed.count(b"\n") == installed.count(b"\r\n")
+            assert fms_installed.count(b"\n") == fms_installed.count(b"\r\n")
         if performance_blocks:
             assert installed.count(b"BEGIN UPSTREAM_TABLET_PERF_CALC DOFILE") == 1
             assert installed.count(b"BEGIN UPSTREAM_TABLET_PERF_CALC HOOKS") == 1
+        if descent_blocks:
+            assert fms_installed.count(b"BEGIN LEVELUP_VNAV_DESCENT_TABLES DOFILE") == 1
+            assert fms_installed.count(b"BEGIN LEVELUP_VNAV_DESCENT_TABLES KIAS") == 1
+            assert fms_installed.count(b"BEGIN LEVELUP_VNAV_DESCENT_TABLES MACH") == 1
         installed_text = installed.decode("utf-8").replace("\r\n", "\n")
         assert installed_text.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
         assert installed_text.index("BEGIN LEVELUP_NG_WB INSTALL") > installed_text.index("function after_physics()")
@@ -197,14 +259,18 @@ def exercise(line_ending: bytes, performance_blocks: bool) -> None:
         assert "\n\t\t\tif not B738_levelup_ng_wb_adapter.owns_payload() then\n\t\t\t\tsimDR_payload_weight = full_crew_weight\n\t\t\tend\n" in installed_text
 
         installed_hash = digest(target)
+        fms_installed_hash = digest(fms_target)
         run(folder)
         assert digest(target) == installed_hash
+        assert digest(fms_target) == fms_installed_hash
         assert {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")} == acf_hashes
 
         run(folder, "--uninstall")
         assert target.read_bytes() == original
+        assert fms_target.read_bytes() == fms_original
         run(folder, "--uninstall")
         assert target.read_bytes() == original
+        assert fms_target.read_bytes() == fms_original
     finally:
         temporary.cleanup()
 
@@ -239,13 +305,17 @@ def exercise_wrong_acf(name: str, version: str) -> None:
     temporary, folder = setup()
     try:
         target = folder / "B738.tablet.lua"
+        fms_target = folder.parent / "B738.a_fms/B738.a_fms.lua"
         original_hash = digest(target)
+        fms_original_hash = digest(fms_target)
         replace_acf_field(folder.parents[3] / name, "acf/_fixed_ref/4,2", "47.000000000")
         result = run(folder, expected=2)
         assert f"violates {version}" in result.stderr
         assert "acf/_fixed_ref/4,2" in result.stderr
         assert digest(target) == original_hash
+        assert digest(fms_target) == fms_original_hash
         assert not (folder / "B738.tablet.lua.levelupngwb.backup").exists()
+        assert not (fms_target.parent / "B738.a_fms.lua.levelupngwb.backup").exists()
     finally:
         temporary.cleanup()
 
@@ -298,7 +368,7 @@ def exercise_v014_upgrade() -> None:
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
         result = run(folder)
-        assert "Installed v0.3.1" in result.stdout
+        assert "Installed v0.3.2" in result.stdout
         upgraded = target.read_text(encoding="utf-8")
         assert "LEVELUP_700_WB" not in upgraded
         assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
@@ -306,6 +376,9 @@ def exercise_v014_upgrade() -> None:
         assert upgraded.rstrip().endswith("-- END LEVELUP_NG_WB INSTALL")
         assert (folder / "B738.tablet.lua.levelup700wb.backup").read_bytes() == backup_marker
         assert not (folder / "B738.tablet.lua.levelupngwb.backup").exists()
+        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
+        assert fms.count("BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
+        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
     finally:
         temporary.cleanup()
 
@@ -346,14 +419,16 @@ def exercise_v020_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.1" in result.stdout
+        assert "Verified package payload: v0.3.2" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "already in the requested state" in result.stdout
+        assert "Installed v0.3.2" in result.stdout
         assert target.read_bytes() == installed_v020
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v020
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
             PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
         )
+        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
+        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
     finally:
         temporary.cleanup()
 
@@ -362,6 +437,8 @@ def exercise_performance_installed_second() -> None:
     temporary, folder = setup()
     try:
         target = folder / "B738.tablet.lua"
+        fms_target = folder.parent / "B738.a_fms/B738.a_fms.lua"
+        fms_original = fms_target.read_bytes()
         original = target.read_text(encoding="utf-8")
         run(folder)
         text = target.read_text(encoding="utf-8")
@@ -386,6 +463,7 @@ def exercise_performance_installed_second() -> None:
         expected = original.replace("jit.off()", "jit.off()\n" + perf_dofile, 1)
         expected = expected.replace("function page_app_rating()", perf_hook + "\nfunction page_app_rating()", 1)
         assert remaining == expected
+        assert fms_target.read_bytes() == fms_original
     finally:
         temporary.cleanup()
 
@@ -405,15 +483,17 @@ def exercise_v021_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.1" in result.stdout
+        assert "Verified package payload: v0.3.2" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "already in the requested state" in result.stdout
+        assert "Installed v0.3.2" in result.stdout
         assert target.read_bytes() == installed_v021
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v021
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
             PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
         )
+        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
+        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
     finally:
         temporary.cleanup()
 
@@ -433,30 +513,70 @@ def exercise_v022_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.3.1" in result.stdout
+        assert "Verified package payload: v0.3.2" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "already in the requested state" in result.stdout
+        assert "Installed v0.3.2" in result.stdout
         assert target.read_bytes() == installed_v022
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v022
+        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
+        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
     finally:
         temporary.cleanup()
 
 
+def exercise_descent_tables_installed_second() -> None:
+    temporary, folder = setup()
+    try:
+        target = folder.parent / "B738.a_fms/B738.a_fms.lua"
+        original = target.read_text(encoding="utf-8")
+        run(folder)
+        text = target.read_text(encoding="utf-8")
+        text = with_descent_blocks(text)
+        target.write_text(text, encoding="utf-8", newline="\n")
+        coexist_hash = digest(target)
+        run(folder)
+        assert digest(target) == coexist_hash
+        run(folder, "--uninstall")
+        remaining = target.read_text(encoding="utf-8")
+        expected = with_descent_blocks(original)
+        assert remaining == expected
+    finally:
+        temporary.cleanup()
+
+
+def exercise_fms_zfw_formula_oracle() -> None:
+    station_masses = (500.0, 750.0, 820.0, 910.0, 1000.0, 1080.0, 1170.0, 125.0, 140.0)
+    physical_payload = sum(station_masses)
+    stale_aggregate = physical_payload + 321.0
+    for contract in installer.ACF_CONTRACTS:
+        empty_kg = float(dict(contract["number"])["acf/_m_empty"]) / 2.2046226218487757
+        expected = empty_kg + physical_payload
+        production_equivalent = empty_kg + sum(max(mass, 0.0) for mass in station_masses)
+        assert abs(production_equivalent - expected) < 1e-9
+        assert production_equivalent != empty_kg + stale_aggregate
+        inherited_stock = expected - 524.0
+        assert abs(expected - inherited_stock - 524.0) < 1e-9
+
+
 assert BASELINE.is_file(), BASELINE
+assert FMS_BASELINE.is_file(), FMS_BASELINE
 exercise_windows_luac_temporary_file_contract()
 exercise(b"\n", False)
 exercise(b"\r\n", False)
 exercise(b"\n", True)
+exercise(b"\n", False, True)
 exercise_v014_upgrade()
 exercise_v020_upgrade()
 exercise_v021_upgrade()
 exercise_v022_upgrade()
 exercise_performance_installed_second()
+exercise_descent_tables_installed_second()
+exercise_fms_zfw_formula_oracle()
 exercise_non_wb_acf_change()
 exercise_station_role_tolerance()
 exercise_wrong_acf("737_70NG.acf", "levelup700-wb-v1")
 exercise_wrong_acf("737_80NG.acf", "levelup800-wb-v2")
 exercise_wrong_acf("737_90NG.acf", "levelup900-wb-v2")
 exercise_wrong_acf("737_9ENG.acf", "levelup900er-wb-v2")
-print("PASS: Windows luac handoff, .35 anchors, legacy migration, four ACF contracts, LF/CRLF, idempotence, uninstall and coexistence")
+print("PASS: Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy migration, four ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")

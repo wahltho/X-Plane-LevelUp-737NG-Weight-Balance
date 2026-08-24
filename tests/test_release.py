@@ -11,11 +11,15 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.1.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.2.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
     "B738X_XP12_4_05_35/plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
+)
+FMS_BASELINE = Path(
+    "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
+    "B738X_XP12_4_05_35/plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua"
 )
 EXPECTED = {
     "B738.tablet_levelup_ng_wb_data.lua",
@@ -26,6 +30,8 @@ EXPECTED = {
     "Replace_external_payload_gate.txt",
     "Replace_internal_payload_gate.txt",
     "Replace_total_payload_scalar_gate.txt",
+    "Add_levelup_ng_wb_fms_empty_weight.txt",
+    "Replace_levelup_ng_wb_fms_zfw_owner.txt",
     "z_Install_LevelUp_NG_WB.py",
     "levelup-ng-wb-package-manifest.txt",
     "README.md",
@@ -38,7 +44,8 @@ EXPECTED = {
     "CHANGELOG.md",
     "LICENSE",
     "patches/B738.tablet.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.3.1.json",
+    "patches/B738.a_fms.lua.json",
+    "contracts/levelup-ng-wb-acf-v0.3.2.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -74,8 +81,11 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         aircraft = Path(temporary) / "LU 737NG Series"
         tablet = aircraft / "plugins/xlua/scripts/B738.tablet"
         tablet.mkdir(parents=True)
+        fms = aircraft / "plugins/xlua/scripts/B738.a_fms"
+        fms.mkdir(parents=True)
         archive.extractall(tablet)
         shutil.copy2(BASELINE, tablet / "B738.tablet.lua")
+        shutil.copy2(FMS_BASELINE, fms / "B738.a_fms.lua")
         for contract in installer.ACF_CONTRACTS:
             write_contract_acf(aircraft / str(contract["name"]), contract)
         completed = subprocess.run(
@@ -90,5 +100,8 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         installed = (tablet / "B738.tablet.lua").read_bytes()
         assert installed.count(b"BEGIN LEVELUP_NG_WB") == 5
         assert b"BEGIN LEVELUP_700_WB" not in installed
+        fms_installed = (fms / "B738.a_fms.lua").read_bytes()
+        assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
+        assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 
-print("PASS: v0.3.1 entries, checksum, source identity and fresh four-contract installation")
+print("PASS: v0.3.2 entries, checksum, source identity and fresh four-contract Tablet/FMS installation")

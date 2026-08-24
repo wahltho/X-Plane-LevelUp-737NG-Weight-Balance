@@ -84,6 +84,17 @@ and aft service stations. Consequently the stock Tablet's fixed `524 kg` crew
 addition is removed only while a supported contract owns payload. The ACF CG
 limits and existing FMC trim tables remain the agreed feasibility baseline.
 
+The upstream FMS independently used
+`B738DR_oew_kg + simDR_payload_weight - full_crew_weight`. Because
+`full_crew_weight` contains the same inherited `524 kg` pilots that are already
+included in LevelUp ACF empty mass, this made FMC ZFW/GW approximately
+`524 kg / 1.155 klb` low. Three independent -900/-900ER RealBench captures
+showed physical-to-FMC deltas of `1.154`, `1.165` and `1.159 klb`. Release
+v0.3.2 therefore uses `acf_m_empty + sum(m_stations[0..8])` for LevelUp IDs
+`2/0/1/4`. The station array is used instead of aggregate `m_fixed` so the FMC
+consumes the same physical owner during slow loading and external-payload
+operation. The upstream formula remains the fallback for every other ID.
+
 ## Formula and coordinate closure
 
 Every modeled CG is calculated in ACF coordinates:
@@ -147,7 +158,7 @@ replace this convention as an intentional fix.
 
 ## Capacity boundaries
 
-The ACF is authoritative. Release v0.3.1 normalizes rounded internal Tablet
+The ACF is authoritative. Release v0.3.2 normalizes rounded internal Tablet
 cargo selections to the exact station maxima before any station or CG write:
 
 - -700 Cargo 1/2 ACF maxima are `1905.088 / 3129.787 kg`, below the stock

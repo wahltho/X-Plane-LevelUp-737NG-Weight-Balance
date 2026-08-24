@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractType": "levelup-ng-weight-balance-acf-contracts",
-  "packageVersion": "0.3.1",
+  "packageVersion": "0.3.2",
   "units": {
     "mass": "lb unless the ACF field defines a count or ratio",
     "longitudinalPosition": "ft in X-Plane ACF body coordinates"

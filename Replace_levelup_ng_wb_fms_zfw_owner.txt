@@ -1,0 +1,14 @@
+	-- BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER
+	if B738DR_b737_variant == 0 or B738DR_b737_variant == 1 or B738DR_b737_variant == 2 or B738DR_b737_variant == 4 then
+		-- FIX: LevelUp ACF empty mass already includes the pilots.  The nine
+		-- physical stations are the payload owner, including during slow loading
+		-- and external-payload operation; do not subtract Zibo's inherited 524 kg.
+		local station_payload_weight = 0
+		for station_index = 0, 8 do
+			station_payload_weight = station_payload_weight + math.max(simDR_payload_stations[station_index] or 0, 0)
+		end
+		zfw_real = simDR_levelup_ng_acf_m_empty + station_payload_weight
+	else
+		zfw_real = B738DR_oew_kg + simDR_payload_weight - full_crew_weight
+	end
+	-- END LEVELUP_NG_WB FMS_ZFW_OWNER

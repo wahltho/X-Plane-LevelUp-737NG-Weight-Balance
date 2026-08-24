@@ -19,7 +19,7 @@ Capture for every case:
 Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all four ACF contracts pass the v0.3.1 installer. A whole-file hash may
+1. Confirm all four ACF contracts pass the v0.3.2 installer. A whole-file hash may
    differ after unrelated flight-model tuning.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
@@ -33,7 +33,9 @@ Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 5. Requested ramp/TOW fuel: compare captured tank allocation after 226.8-kg
    taxi fuel, independent mass/moment, EFB TOW CG and `calc_to_cg`.
 6. FMC transfer: accept the produced CG on TAKEOFF REF and record the existing
-   trim-table result for the same flaps and CG.
+   trim-table result for the same flaps and CG. Confirm PERF INIT ZFW equals
+   ACF empty mass plus all nine stations within display rounding, and that FMC
+   GW equals that ZFW plus actual fuel.
 7. Destination fuel/LW: compare the three modeled tank values, independent
    landing moment and EFB LW CG.
 8. External payload: change every station with an external tool. Tablet and
@@ -62,11 +64,15 @@ Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 5. Repeat representative cases with the performance patch installed before
    and after this W&B package.
 6. Upgrade an aircraft with -700 v0.1.4 installed. Verify the original backup
-   remains unchanged, only five common v0.3.1 blocks remain, and all four
+   remains unchanged, only five common Tablet v0.3.2 blocks plus two FMS blocks
+   remain, and all four
    supported variants load.
 7. Upgrade an aircraft with v0.2.0 installed and Jochen's revised 800 ACF.
    Verify the common hooks remain singletons, the 800 v2 contract is active,
    and no old arm values survive in the installed runtime data.
+8. Repeat one representative case with the VNAV descent-table patch installed
+   before W&B and once with it installed after W&B. Verify both FMS marked
+   blocks remain singletons and uninstalling W&B preserves the VNAV block.
 
 ## Known regression reproducer
 

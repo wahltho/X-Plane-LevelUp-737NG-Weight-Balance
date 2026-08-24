@@ -1,0 +1,3 @@
+-- BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT
+simDR_levelup_ng_acf_m_empty	= find_dataref("sim/aircraft/weight/acf_m_empty")
+-- END LEVELUP_NG_WB FMS_EMPTY_WEIGHT
