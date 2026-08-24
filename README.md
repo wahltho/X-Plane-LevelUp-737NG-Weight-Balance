@@ -3,7 +3,7 @@
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
 `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.3.2`
+unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.3.3`
 supports Variant-IDs `2/0/1/4` (`737-700/-800/-900/-900ER`) from one package.
 The -600, every MAX variant and stock Zibo delegate to the original Tablet
 functions.
@@ -13,7 +13,7 @@ The initial standalone repository import is derived from the committed
 Future public LevelUp W&B patch development belongs here; the private C++ port
 remains owned by the Zibo Mod repository.
 
-`v0.3.2` supersedes the -700-only `v0.1.4` and common
+`v0.3.3` supersedes the -700-only `v0.1.4` and common
 `v0.2.0`/`v0.2.1`/`v0.2.2`/`v0.2.3`
 packages. The installer migrates the five old `LEVELUP_700_WB` blocks in place,
 preserves the original v0.1.x backup and installs the common adapter only after
@@ -24,7 +24,7 @@ v0.3.0 added Jochen's first -900/-900ER contracts and exact per-variant cargo
 normalization. v0.3.1 follows the refined 2026-08-22 -900/-900ER station and
 tank geometry; both variants now use fixed `69 / 62 / 69 ft` tank arms. The loader remains directly
 after `jit.off()`; it never assigns the discarded XLua `dofile()` return value.
-Release v0.3.2 additionally closes the LevelUp FMC ZFW/GW owner mismatch. For
+Release v0.3.3 additionally closes the LevelUp FMC ZFW/GW owner mismatch. For
 IDs `2/0/1/4`, FMS ZFW now uses ACF empty mass plus the nine physical
 `m_stations` values and no longer subtracts Zibo's inherited `524 kg` pilots a
 second time. Stock Zibo and unsupported variants retain the upstream formula.
@@ -76,8 +76,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.3.2.zip`
-- `LevelUp-737NG-Weight-Balance-v0.3.2.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.3.3.zip`
+- `LevelUp-737NG-Weight-Balance-v0.3.3.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:
@@ -128,7 +128,7 @@ The source handoff is machine-readable:
 
 - `patches/B738.tablet.lua.json` contains the five structural Tablet changes;
 - `patches/B738.a_fms.lua.json` contains the two structural FMS changes;
-- `contracts/levelup-ng-wb-acf-v0.3.2.json` contains the semantic ACF fields
+- `contracts/levelup-ng-wb-acf-v0.3.3.json` contains the semantic ACF fields
   required by the four supported variants;
 - `toolkit/weight-and-balance-module.json` binds payload hashes, target paths,
   variant IDs and the intended schema-3 operations.

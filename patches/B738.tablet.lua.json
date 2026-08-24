@@ -2,18 +2,6 @@
   "format": "exact-text-replacements-v1",
   "replacements": [
     {
-      "name": "LevelUp W&B adapter loader",
-      "oldLines": [
-        "jit.off()"
-      ],
-      "newLines": [
-        "jit.off()",
-        "-- BEGIN LEVELUP_NG_WB DOFILE",
-        "dofile(\"B738.tablet_levelup_ng_wb_adapter.lua\")",
-        "-- END LEVELUP_NG_WB DOFILE"
-      ]
-    },
-    {
       "name": "LevelUp W&B external payload ownership gate",
       "oldLines": [
         "\tif B738DR_ext_payload == 0 then",

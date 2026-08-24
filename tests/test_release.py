@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.2.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.3.3.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -43,9 +43,10 @@ EXPECTED = {
     "ACF_RECONCILE_2026_08_23.md",
     "CHANGELOG.md",
     "LICENSE",
+    "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.3.2.json",
+    "contracts/levelup-ng-wb-acf-v0.3.3.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -104,4 +105,4 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 
-print("PASS: v0.3.2 entries, checksum, source identity and fresh four-contract Tablet/FMS installation")
+print("PASS: v0.3.3 entries, checksum, source identity and fresh four-contract Tablet/FMS installation")

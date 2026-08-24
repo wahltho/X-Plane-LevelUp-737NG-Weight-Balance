@@ -1,0 +1,13 @@
+{
+  "format": "insert-marked-block-v1",
+  "name": "LevelUp W&B adapter loader",
+  "beginMarker": "-- BEGIN LEVELUP_NG_WB DOFILE",
+  "endMarker": "-- END LEVELUP_NG_WB DOFILE",
+  "contentLines": [
+    "dofile(\"B738.tablet_levelup_ng_wb_adapter.lua\")"
+  ],
+  "anchorLines": [
+    "jit.off()"
+  ],
+  "position": "after"
+}

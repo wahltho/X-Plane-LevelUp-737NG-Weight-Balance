@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.3 - 2026-08-24
+
+- Split the shared Tablet loader into an independent
+  `insert-marked-block-v1` operation.
+- Keep W&B hook replacements separate so other marked Tablet loaders can be
+  installed and removed independently.
+- Add standalone package-coexistence coverage for the performance-calculator
+  loader.
+
 ## 0.3.2 - 2026-08-24
 
 - Fixes the approximately `1.155 klb` LevelUp FMC ZFW/GW deficit caused by

@@ -1,5 +1,5 @@
 package|id|levelup-737ng-weight-balance-test-balloon
-package|version|v0.3.2
+package|version|v0.3.3
 package|repository|https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance
 target|script|B738.tablet.lua
 target|script|B738.a_fms.lua
@@ -31,7 +31,8 @@ payload|file|Replace_total_payload_scalar_gate.txt|size|210|sha256|0481d57d32e5b
 payload|file|Add_levelup_ng_wb_fms_empty_weight.txt|size|157|sha256|a8db8e412d896db2a95365d1b896a3848ee518205115f731117e74195f4422ef
 payload|file|Replace_levelup_ng_wb_fms_zfw_owner.txt|size|745|sha256|dc9b5ffba3a26489e1a0422a2cca1f4f796a18776948cdc02f74daae122924fd
 payload|file|z_Install_LevelUp_NG_WB.py|size|22078|sha256|787f278422aae0bb1bd24beb4c0059cb27702856a00787b079b6656243df5983
-payload|file|patches/B738.tablet.lua.json|size|2098|sha256|18e30828e8f6a49ca85652fdd4b35307c86d3fe820564f1d5c1842bc07776c17
+payload|file|patches/B738.tablet.loader.json|size|321|sha256|dc4e8aca56bb3af5620aa384a4088e01b92d90c7b7f1701e3f66f0aeb9349e5d
+payload|file|patches/B738.tablet.lua.json|size|1803|sha256|879d91cc363750db966267ec391184c0c02fd18443c59d6e9277c0280f27316f
 payload|file|patches/B738.a_fms.lua.json|size|1701|sha256|cfcd366f826da403fa33911328f8e61fe67169067ec741a5eff1b9fb93c5d339
-payload|file|contracts/levelup-ng-wb-acf-v0.3.2.json|size|11713|sha256|eee713dddf68201a48ab3cb05df0dd63503f70fe3a60f68ab51f5e1e2d62c76c
-payload|file|toolkit/weight-and-balance-module.json|size|3971|sha256|5f065e1ad29c2c2b100f2eecd16f13053bb512d0545ef32a4e58c82a5b377b44
+payload|file|contracts/levelup-ng-wb-acf-v0.3.3.json|size|11713|sha256|1df526f9bd18bfeb253474a535c3b73aba90111dd3622a13a1a4f51299bd55e0
+payload|file|toolkit/weight-and-balance-module.json|size|4318|sha256|3334f4aa3eecf019d94727a61531d19a379dea206d4a6c1d7e72228d0a15e74a
