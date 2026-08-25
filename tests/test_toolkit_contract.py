@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 MODULE_MANIFEST = REPOSITORY / "toolkit/weight-and-balance-module.json"
-ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.3.3.json"
+ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.4.0.json"
 TABLET_LOADER_PATCH = REPOSITORY / "patches/B738.tablet.loader.json"
 TABLET_PATCH = REPOSITORY / "patches/B738.tablet.lua.json"
 FMS_PATCH = REPOSITORY / "patches/B738.a_fms.lua.json"
@@ -71,9 +71,9 @@ manifest = json.loads(MODULE_MANIFEST.read_text(encoding="utf-8"))
 assert manifest["schemaVersion"] == 1
 assert manifest["manifestType"] == "levelup-compatibility-module-source"
 assert manifest["moduleId"] == "weight-and-balance"
-assert manifest["moduleVersion"] == "0.3.3"
+assert manifest["moduleVersion"] == "0.4.0"
 assert manifest["toolkitIntegration"]["directCatalogEntry"] is False
-assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [2, 0, 1, 4]
+assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [3, 2, 0, 1, 4]
 
 payloads = {entry["path"]: entry for entry in manifest["payloads"]}
 for relative_path, metadata in payloads.items():
@@ -124,6 +124,7 @@ assert fms_patched.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 assert "for station_index = 0, 8 do" in fms_patched
 assert "zfw_real = simDR_levelup_ng_acf_m_empty + station_payload_weight" in fms_patched
 assert "B738DR_b737_variant == 4" in fms_patched
+assert "B738DR_b737_variant == 3" in fms_patched
 
 spec = importlib.util.spec_from_file_location("levelup_ng_wb_installer", INSTALLER)
 assert spec is not None and spec.loader is not None
@@ -131,7 +132,7 @@ installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
 contract = json.loads(ACF_CONTRACT.read_text(encoding="utf-8"))
 assert contract["schemaVersion"] == 1
-assert contract["packageVersion"] == "0.3.3"
+assert contract["packageVersion"] == "0.4.0"
 json_contracts = {entry["name"]: entry for entry in contract["variants"]}
 installer_contracts = {entry["name"]: entry for entry in installer.ACF_CONTRACTS}
 assert set(json_contracts) == set(installer_contracts)

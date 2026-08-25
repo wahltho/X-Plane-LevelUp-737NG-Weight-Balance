@@ -37,11 +37,12 @@ def make_acf_contract(
     station_maxima: tuple[float, ...],
     tank_empty_arms: tuple[float, ...],
     tank_full_arms: tuple[float, ...],
+    tank_names: tuple[str, str, str] = ("Left Main", "Center Wing", "Right Main"),
 ) -> dict[str, object]:
     text_fields = {
-        "acf/_tank_name/0": "Left Main",
-        "acf/_tank_name/1": "Center Wing",
-        "acf/_tank_name/2": "Right Main",
+        "acf/_tank_name/0": tank_names[0],
+        "acf/_tank_name/1": tank_names[1],
+        "acf/_tank_name/2": tank_names[2],
     }
     number_fields = {
         "acf/_m_empty": empty_mass,
@@ -77,6 +78,17 @@ def make_acf_contract(
 
 
 ACF_CONTRACTS = (
+    make_acf_contract(
+        "levelup600-wb-v1", "737_60NG.acf",
+        80199.78, 45.979999542, 44.229999542, 47.700000763, 14.878139496,
+        124499.8, 46062.01,
+        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
+        (25, 63, 20, 33, 46, 59, 72, 15, 76.199996948),
+        (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
+        (49, 43, 49),
+        (49, 43, 49),
+        ("Left Main", "Center Wing", "Right Wing"),
+    ),
     make_acf_contract(
         "levelup700-wb-v1", "737_70NG.acf",
         82999.61, 49.029998779, 47.189998627, 50.939998627, 14.992128372,

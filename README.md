@@ -2,10 +2,10 @@
 
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
-`737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.3.3`
-supports Variant-IDs `2/0/1/4` (`737-700/-800/-900/-900ER`) from one package.
-The -600, every MAX variant and stock Zibo delegate to the original Tablet
+`737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
+unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.4.0`
+supports Variant-IDs `3/2/0/1/4` (`737-600/-700/-800/-900/-900ER`) from one package.
+Every MAX variant and stock Zibo delegate to the original Tablet
 functions.
 
 The initial standalone repository import is derived from the committed
@@ -13,7 +13,7 @@ The initial standalone repository import is derived from the committed
 Future public LevelUp W&B patch development belongs here; the private C++ port
 remains owned by the Zibo Mod repository.
 
-`v0.3.3` supersedes the -700-only `v0.1.4` and common
+`v0.4.0` supersedes the -700-only `v0.1.4` and common
 `v0.2.0`/`v0.2.1`/`v0.2.2`/`v0.2.3`
 packages. The installer migrates the five old `LEVELUP_700_WB` blocks in place,
 preserves the original v0.1.x backup and installs the common adapter only after
@@ -24,10 +24,11 @@ v0.3.0 added Jochen's first -900/-900ER contracts and exact per-variant cargo
 normalization. v0.3.1 follows the refined 2026-08-22 -900/-900ER station and
 tank geometry; both variants now use fixed `69 / 62 / 69 ft` tank arms. The loader remains directly
 after `jit.off()`; it never assigns the discarded XLua `dofile()` return value.
-Release v0.3.3 additionally closes the LevelUp FMC ZFW/GW owner mismatch. For
-IDs `2/0/1/4`, FMS ZFW now uses ACF empty mass plus the nine physical
+Release v0.3.2 additionally closed the LevelUp FMC ZFW/GW owner mismatch. For
+supported IDs, FMS ZFW uses ACF empty mass plus the nine physical
 `m_stations` values and no longer subtracts Zibo's inherited `524 kg` pilots a
 second time. Stock Zibo and unsupported variants retain the upstream formula.
+Release v0.4.0 adds Jochen's V2.S1.51 -600 contract to that complete owner chain.
 
 ## Owner contract
 
@@ -57,12 +58,13 @@ checksum.
 
 | Variant | ID | ACF contract | Empty / max mass | MAC |
 |---|---:|---|---:|---:|
+| 737-600 | 3 | `levelup600-wb-v1` | `80199.78 / 124499.8 lb` | `14.878139496 ft` |
 | 737-700 | 2 | `levelup700-wb-v1` | `82999.61 / 154499.9 lb` | `14.992128372 ft` |
 | 737-800 | 0 | `levelup800-wb-v2` | `91514.04 / 174700 lb` | `14.992127419 ft` |
 | 737-900 | 1 | `levelup900-wb-v2` | `94580 / 174700 lb` | `14.993530273 ft` |
 | 737-900ER | 4 | `levelup900er-wb-v2` | `98495 / 187699.31 lb` | `14.993530273 ft` |
 
-All four contracts contain two cargo stations, five passenger zones and two
+All five contracts contain two cargo stations, five passenger zones and two
 service/cabin-crew stations. The refined -900 and -900ER contracts both use
 `69 / 62 / 69 ft` constant tank arms.
 
@@ -76,8 +78,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.3.3.zip`
-- `LevelUp-737NG-Weight-Balance-v0.3.3.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.4.0.zip`
+- `LevelUp-737NG-Weight-Balance-v0.4.0.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:
@@ -94,7 +96,7 @@ package inputs verified in their normal LevelUp root.
 
 The -700 station/current-CG path was observed at `22.63 %MAC` with v0.1.3.
 The v0.1.3 planned-CG failure was traced to an XLua local property binding and
-fixed in v0.1.4. The revised -800/-900/-900ER contracts have no simulator
+fixed in v0.1.4. The new -600 and revised -800/-900/-900ER contracts have no simulator
 acceptance evidence yet. Dry tests prove deterministic math, owner delegation,
 variant cache invalidation, installer migration and archive integrity; they do
 not prove X-Plane runtime behavior.
@@ -128,8 +130,8 @@ The source handoff is machine-readable:
 
 - `patches/B738.tablet.lua.json` contains the five structural Tablet changes;
 - `patches/B738.a_fms.lua.json` contains the two structural FMS changes;
-- `contracts/levelup-ng-wb-acf-v0.3.3.json` contains the semantic ACF fields
-  required by the four supported variants;
+- `contracts/levelup-ng-wb-acf-v0.4.0.json` contains the semantic ACF fields
+  required by the five supported variants;
 - `toolkit/weight-and-balance-module.json` binds payload hashes, target paths,
   variant IDs and the intended schema-3 operations.
 

@@ -1,6 +1,6 @@
 local package_root = arg[0]:match("^(.*)/tests/") or "."
 
-B738DR_b737_variant = 3
+B738DR_b737_variant = 6
 B738DR_ext_payload = 0
 B738DR_std_pax_weight = { [0] = 84, [1] = 35, [2] = 10 }
 B738DR_fa_fwd_kg = 120
@@ -28,6 +28,19 @@ simDR_cg_xp12 = 0.12
 local LB_TO_KG = 0.45359237
 local FT_TO_M = 0.3048
 local literal = {
+    [3] = {
+        empty_mass = 80199.78 * LB_TO_KG,
+        empty_arm = 45.979999542 * FT_TO_M,
+        mac = 14.878139496 * FT_TO_M,
+        lemac = 13.2,
+        fwd = 44.229999542 * FT_TO_M,
+        aft = 47.700000763 * FT_TO_M,
+        station_arms = { 25, 63, 20, 33, 46, 59, 72, 15, 76.199996948 },
+        fuel_total = 46062.01,
+        tank_empty = { 49, 43, 49 },
+        tank_full = { 49, 43, 49 },
+        takeoff_fuel = { 3907.0614902557695, 1959.077019488461, 3907.0614902557695 },
+    },
     [0] = {
         empty_mass = 91514.04 * LB_TO_KG,
         empty_arm = 59.889999390 * FT_TO_M,
@@ -245,6 +258,7 @@ local function exercise_variant(variant)
 end
 
 exercise_variant(2)
+exercise_variant(3)
 exercise_variant(0)
 exercise_variant(1)
 exercise_variant(4)
@@ -284,6 +298,6 @@ zfw_offset_value = 100
 adapter.frame_update()
 assert(B738DR_calc_to_cg == 0, "invalid X-Plane datum must suppress FMC CG instead of publishing a guess")
 
-B738DR_b737_variant = 3
+B738DR_b737_variant = 6
 assert(check_tow(1, 1) == "stock_tow", "variant switch must relinquish envelope ownership")
-print("PASS: -700/-800/-900/-900ER owners, ACF tank arms, exact cargo limits, external read-only and delegation")
+print("PASS: -600/-700/-800/-900/-900ER owners, ACF tank arms, exact cargo limits, external read-only and delegation")

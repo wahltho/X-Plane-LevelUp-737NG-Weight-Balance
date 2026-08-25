@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 - 2026-08-25
+
+- Adds Jochen Heiden's V2.S1.51 737-600 ACF as `levelup600-wb-v1`
+  (Variant ID `3`) to the common station, CG, FMC-ZFW and trim-handoff owner.
+- Uses the supplied two cargo, five passenger-zone and two service stations,
+  fixed ACF CG limits and constant `49 / 43 / 49 ft` tank arms.
+- Reconciles the private -600 overlay while preserving its object table,
+  Collins WXR integration and transformed cockpit/default view.
+- Extends semantic ACF gates, independent mass-and-moment oracles, lifecycle,
+  external-payload and Toolkit-source tests to all five NG variants.
+- Leaves FMC trim tables and VREF performance logic unchanged.
+
 ## 0.3.3 - 2026-08-24
 
 - Split the shared Tablet loader into an independent

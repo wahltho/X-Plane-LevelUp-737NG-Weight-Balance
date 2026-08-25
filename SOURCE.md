@@ -1,10 +1,23 @@
 # Evidence and derivation
 
-This test balloon covers `737_70NG.acf`/ID `2`, `737_80NG.acf`/ID `0`,
-`737_90NG.acf`/ID `1` and `737_9ENG.acf`/ID `4`. No values are inferred for
-the -600 or any MAX variant.
+This test balloon covers `737_60NG.acf`/ID `3`, `737_70NG.acf`/ID `2`,
+`737_80NG.acf`/ID `0`, `737_90NG.acf`/ID `1` and `737_9ENG.acf`/ID `4`.
+No values are inferred for any MAX variant.
 
 ## Reference aircraft
+
+| Field | 737-600 |
+|---|---:|
+| Contract | `levelup600-wb-v1` |
+| Reference SHA-256 | `362f1e5ca26186f527e4924f4e43328dcb3b2e87945b462b8125f237b73da123` |
+| Empty mass | `80199.78 lb` |
+| Reference CG | `45.979999542 ft` |
+| Fixed forward/aft | `44.229999542 / 47.700000763 ft` |
+| MAC | `14.878139496 ft` |
+| Maximum gross mass | `124499.8 lb` |
+| Fuel capacity | `46062.01 lb` |
+| Tank ratios | `0.187000006 / 0.625999987 / 0.187000006` |
+| Empty/full tank arms | `49 / 43 / 49 ft` |
 
 | Field | 737-700 | 737-800 |
 |---|---:|---:|
@@ -34,6 +47,7 @@ the -600 or any MAX variant.
 | Full tank arms | `69 / 62 / 69 ft` | `69 / 62 / 69 ft` |
 
 The current references are
+`/Users/wahltho/Downloads/Level Up/737_60NG.acf`,
 `/Users/wahltho/Downloads/Level Up/737_70NG.acf`, the retained -800 provenance,
 and `/Users/wahltho/Downloads/Level Up/737_90NG.acf` plus `737_9ENG.acf`.
 The SHA-256 values record evidence
@@ -42,6 +56,12 @@ consumed mass, CG/MAC, station and tank field semantically and allows all
 unrelated ACF changes.
 
 ## Payload stations
+
+The -600 uses Cargo 1/2 at `25/63 ft` with `4200/6900 lb` maxima, Zones 1-5
+at `20/33/46/59/72 ft` with `8000 lb` each, and Galley F/A at
+`15/76.199996948 ft` with `3000 lb` each. These arms are the aircraft author's
+current test-balloon/WAG geometry and are not independently validated
+real-aircraft station data.
 
 | Index | 737-700 name / arm / max | 737-800 name / arm / max | Role |
 |---:|---|---|---|
@@ -90,8 +110,9 @@ The upstream FMS independently used
 included in LevelUp ACF empty mass, this made FMC ZFW/GW approximately
 `524 kg / 1.155 klb` low. Three independent -900/-900ER RealBench captures
 showed physical-to-FMC deltas of `1.154`, `1.165` and `1.159 klb`. Release
-v0.3.2 therefore uses `acf_m_empty + sum(m_stations[0..8])` for LevelUp IDs
-`2/0/1/4`. The station array is used instead of aggregate `m_fixed` so the FMC
+v0.3.2 therefore uses `acf_m_empty + sum(m_stations[0..8])` for the initially
+supported LevelUp IDs; v0.4.0 extends the same gate to ID `3`. The station array
+is used instead of aggregate `m_fixed` so the FMC
 consumes the same physical owner during slow loading and external-payload
 operation. The upstream formula remains the fallback for every other ID.
 
@@ -134,6 +155,10 @@ control case has station masses
 - gross moment: `1104667.7681431761 kg m`;
 - longitudinal CG: `18.003039482982054 m`.
 
+For the -600, the same explicit station and tank masses give
+`56228.0082836786 kg`, `773372.3328944296 kg m` and
+`13.754218875985291 m`.
+
 Using the same explicit `8850 kg` station snapshot with `12000 kg` requested
 ramp fuel and the fixed `226.8 kg` taxi allowance, the takeoff state is
 `3907.061490 / 3959.077019 / 3907.061490 kg` and shifts CG by
@@ -163,6 +188,7 @@ cargo selections to the exact station maxima before any station or CG write:
 
 - -700 Cargo 1/2 ACF maxima are `1905.088 / 3129.787 kg`, below the stock
   Tablet's `1927 / 3172 kg` by `21.912 / 42.213 kg`.
+- -600 uses the same Cargo 1/2 maxima and exact margins as the -700.
 - -800 Cargo 1/2 ACF maxima are `3559.793 / 4848.902 kg`, below the Tablet's
   `3560 / 4850 kg` by `0.207 / 1.098 kg`.
 - -900 uses the same exact cargo maxima as -800.
@@ -179,6 +205,13 @@ silently discarding crew or catering weight. These are documented acceptance
 boundaries, not guessed ACF changes.
 
 ## Scope of the reconciled ACFs
+
+Jochen's 2026-08-24 -600 input supplies the V2.S1.51 flightmodel and the
+complete nine-station contract above. The private port reconcile accepts that
+flightmodel and W&B state while preserving the private object table, Collins
+WXR integration and transformed cockpit/default view. Galley roles are
+normalized to service/cargo role `1`; the public semantic gate deliberately
+does not consume the X-Plane UI role category.
 
 Compared with the first 800 contract, Jochen's 2026-08-20 file moves Cargo 1
 from `36` to `37 ft`, moves all five passenger zones aft by `2.5 ft`, moves

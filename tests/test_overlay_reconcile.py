@@ -13,6 +13,15 @@ OVERLAY = REPO / "overlay/LU 737NG Series"
 MANIFEST = REPO / "overlay/LU 737NG Series manifest.json"
 
 EXPECTED = {
+    "737_60NG.acf": {
+        "sha256": "b06555077f214263cc146c6c8519b7469937cf19889458e979eacf2d96549dce",
+        "version": "XP12 V2.S1.51 (20260824 200 SAO)", "object_count": 42,
+        "view": (-1.626870131, 2.342401763, 9.099929059, -2.988779),
+        "cg_mac": (45.979999542, 44.229999542, 47.700000763, 14.878139496),
+        "arms": (25, 63, 20, 33, 46, 59, 72, 15, 76.199996948),
+        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
+        "flaps": (0.071000002, 0.850000024, -0.699999988),
+    },
     "737_70NG.acf": {
         "sha256": "a5d2cdd9e7dec57ec42d22a0937f3c08ee56e1adbd7334b87bbfd38fb9a811f2",
         "version": "XP12 2.S1.51 (20260819 2130 SAO)", "object_count": 42,
@@ -90,4 +99,4 @@ for filename, expected in EXPECTED.items():
     if "flaps" in expected:
         assert tuple(float(fields[key]) for key in ("acf/_flap1_cd", "acf/_flap1_cl", "acf/_flap1_cm")) == expected["flaps"]
 
-print("PASS: reconciled V2.S1.51 700/800/900/900ER W&B, flightmodel, private objects and cockpit views")
+print("PASS: reconciled V2.S1.51 600/700/800/900/900ER W&B, flightmodel, private objects and cockpit views")

@@ -16,10 +16,10 @@ Capture for every case:
 
 ## Per-variant matrix
 
-Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
+Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all four ACF contracts pass the v0.3.3 installer. A whole-file hash may
+1. Confirm all five ACF contracts pass the v0.4.0 installer. A whole-file hash may
    differ after unrelated flight-model tuning.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
@@ -51,21 +51,21 @@ Run the following with `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 
 ## Variant/lifecycle regressions
 
-1. Exercise direct transitions `2 -> 0 -> 1 -> 4 -> 2`. Before publication,
+1. Exercise direct transitions `3 -> 2 -> 0 -> 1 -> 4 -> 3`. Before publication,
    the prior calibrated LEMAC must be invalidated and predictions must converge
    to the newly selected contract.
 2. On the -900 and -900ER, compare empty, half-full and full main tanks. Verify
    the captured moment follows the ACF's constant `69 ft` main-tank arms and
    that TOW/LW predictions use the same arm rule.
-3. Load a LevelUp ID 3 aircraft. The patch must relinquish all payload, CG and
-   envelope ownership and preserve stock behavior.
+3. Load any actually available unsupported LevelUp/MAX ID. The patch must
+   relinquish all payload, CG and envelope ownership and preserve stock behavior.
 4. Load stock Zibo 737-800. Confirm no LevelUp station writer, current-CG
    override or FMC handoff is active.
 5. Repeat representative cases with the performance patch installed before
    and after this W&B package.
 6. Upgrade an aircraft with -700 v0.1.4 installed. Verify the original backup
-   remains unchanged, only five common Tablet v0.3.3 blocks plus two FMS blocks
-   remain, and all four
+   remains unchanged, only five common Tablet v0.4.0 blocks plus two FMS blocks
+   remain, and all five
    supported variants load.
 7. Upgrade an aircraft with v0.2.0 installed and Jochen's revised 800 ACF.
    Verify the common hooks remain singletons, the 800 v2 contract is active,
@@ -81,7 +81,7 @@ For the -700 reproduce approximately `34309 lb` payload, `119682 lb` ZFW,
 previously observed `22.63 %MAC`; ZFW/TOW CG and `calc_to_cg` must be nonzero,
 inside the fixed envelope and not show `CHECK`.
 
-For each of the -800/-900/-900ER record at least empty, balanced
+For each of the -600/-800/-900/-900ER record at least empty, balanced
 full-passenger, forward-cargo, aft-cargo and Airside-service loads. Compare all
 outcomes against independent mass/moment calculations using that variant's
 station and tank arms in `SOURCE.md`.

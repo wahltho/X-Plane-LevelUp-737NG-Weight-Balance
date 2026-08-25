@@ -16,6 +16,17 @@ DATA = PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
 INSTALLER = PACKAGE / "z_Install_LevelUp_NG_WB.py"
 
 EXPECTED = {
+    "737_60NG.acf": {
+        "variant": 3, "version": "levelup600-wb-v1",
+        "reference_hash": "362f1e5ca26186f527e4924f4e43328dcb3b2e87945b462b8125f237b73da123",
+        "overlay_hash": "b06555077f214263cc146c6c8519b7469937cf19889458e979eacf2d96549dce",
+        "mass": (80199.78, 45.979999542, 44.229999542, 47.700000763, 14.878139496, 124499.8, 46062.01),
+        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
+        "arms": (25, 63, 20, 33, 46, 59, 72, 15, 76.199996948),
+        "maxima": (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
+        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
+        "tank_empty": (49, 43, 49), "tank_full": (49, 43, 49),
+    },
     "737_70NG.acf": {
         "variant": 2, "version": "levelup700-wb-v1",
         "reference_hash": "8cb0d7254e63cd1a2b4fe88071e706393504e6bfce7ab6af3cca417d22ea3c31",
@@ -105,12 +116,12 @@ for expected in EXPECTED.values():
     assert expected["version"] in source
     assert expected["reference_hash"] in source
 station_rows = re.findall(r'\{ name = "([^\"]+)",\s+arm_m = ([0-9.]+) \* FT_TO_M, max_kg = ([0-9.]+) \* LB_TO_KG \}', source)
-assert len(station_rows) == 36
-for offset, variant in enumerate((0, 1, 2, 4)):
+assert len(station_rows) == 45
+for offset, variant in enumerate((0, 1, 2, 3, 4)):
     expected = next(item for item in EXPECTED.values() if item["variant"] == variant)
     rows = station_rows[offset * 9:(offset + 1) * 9]
     assert tuple(row[0] for row in rows) == expected["names"]
     assert tuple(float(row[1]) for row in rows) == expected["arms"]
     assert tuple(float(row[2]) for row in rows) == expected["maxima"]
 
-print("PASS: exact -700/-800/-900/-900ER overlay fields, Lua provenance and installer contracts")
+print("PASS: exact -600/-700/-800/-900/-900ER overlay fields, Lua provenance and installer contracts")

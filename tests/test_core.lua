@@ -17,6 +17,14 @@ for i = 1, 9 do near(targets[i], expected_targets[i], 1e-12, "target " .. i) end
 local station_masses = { 1000, 500, 2000, 1800, 1600, 300, 1200, 200, 250 }
 local fuel_masses = { 3000, 5000, 3000 }
 
+local data600 = contracts[3]
+local z600, mass600, moment600 = core.cg_z(
+    data600.empty_mass_kg, data600.empty_cg_z_m, station_masses, data600.stations, fuel_masses, data600.tanks
+)
+near(mass600, 56228.0082836786, 1e-9, "600 gross mass")
+near(moment600, 773372.3328944296, 1e-6, "600 gross moment")
+near(z600, 13.754218875985291, 1e-12, "600 cg z")
+
 local data700 = contracts[2]
 local z700, mass700, moment700 = core.cg_z(
     data700.empty_mass_kg, data700.empty_cg_z_m, station_masses, data700.stations, fuel_masses, data700.tanks
@@ -68,6 +76,10 @@ local distributed700 = core.fuel_from_total(10000, data700.tanks)
 near(distributed700[1], 3907.0613206122184, 1e-9, "700 left fuel")
 near(distributed700[2], 2185.877358775563, 1e-9, "700 center fuel")
 near(distributed700[3], 3907.0613206122184, 1e-9, "700 right fuel")
+local distributed600 = core.fuel_from_total(10000, data600.tanks)
+near(distributed600[1], 3907.0614902557695, 1e-9, "600 left fuel")
+near(distributed600[2], 2185.877019488461, 1e-9, "600 center fuel")
+near(distributed600[3], 3907.0614902557695, 1e-9, "600 right fuel")
 local distributed800 = core.fuel_from_total(10000, data800.tanks)
 near(distributed800[1], 3907.0614902557695, 1e-9, "800 left fuel")
 near(distributed800[2], 2185.877019488461, 1e-9, "800 center fuel")
@@ -97,6 +109,7 @@ near(after_taxi[2], 273.2, 1e-12, "taxi center")
 near(after_taxi[3], 3000, 1e-12, "taxi right")
 
 assert(core.validate_station_masses(expected_targets, data700.stations))
+assert(core.validate_station_masses(expected_targets, data600.stations))
 assert(core.validate_station_masses(expected_targets, data800.stations))
 local invalid700, index700 = core.validate_station_masses({ 1927, 0, 0, 0, 0, 0, 0, 0, 0 }, data700.stations)
 assert(not invalid700 and index700 == 1, "700 ACF cargo maximum must remain authoritative")
@@ -123,4 +136,4 @@ near(aft800, 31.705880339220826, 1e-12, "800 fixed aft limit")
 assert(core.within_fixed_envelope(70000, 20, data800, 17.4))
 assert(not core.within_fixed_envelope(80000, 20, data800, 17.4))
 
-print("PASS: 700/800/900/900ER stations, independent mass/moment, ACF fuel arms, taxi and fixed envelopes")
+print("PASS: 600/700/800/900/900ER stations, independent mass/moment, ACF fuel arms, taxi and fixed envelopes")

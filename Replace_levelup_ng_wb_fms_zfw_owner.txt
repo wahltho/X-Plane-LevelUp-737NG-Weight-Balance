@@ -1,5 +1,5 @@
 	-- BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER
-	if B738DR_b737_variant == 0 or B738DR_b737_variant == 1 or B738DR_b737_variant == 2 or B738DR_b737_variant == 4 then
+	if B738DR_b737_variant == 0 or B738DR_b737_variant == 1 or B738DR_b737_variant == 2 or B738DR_b737_variant == 3 or B738DR_b737_variant == 4 then
 		-- FIX: LevelUp ACF empty mass already includes the pilots.  The nine
 		-- physical stations are the payload owner, including during slow loading
 		-- and external-payload operation; do not subtract Zibo's inherited 524 kg.
