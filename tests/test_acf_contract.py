@@ -17,12 +17,12 @@ INSTALLER = PACKAGE / "z_Install_LevelUp_NG_WB.py"
 
 EXPECTED = {
     "737_60NG.acf": {
-        "variant": 3, "version": "levelup600-wb-v1",
-        "reference_hash": "362f1e5ca26186f527e4924f4e43328dcb3b2e87945b462b8125f237b73da123",
-        "overlay_hash": "b06555077f214263cc146c6c8519b7469937cf19889458e979eacf2d96549dce",
+        "variant": 3, "version": "levelup600-wb-v2",
+        "reference_hash": "c808d3536fd938bb76c51e0acf7256bd65bed2a7380eabbec496ccde90a518d4",
+        "overlay_hash": "02e39a193298f86828d74c9752ae3cf768ebb940c36d462540dff71b05ccf861",
         "mass": (80199.78, 45.979999542, 44.229999542, 47.700000763, 14.878139496, 124499.8, 46062.01),
         "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        "arms": (25, 63, 20, 33, 46, 59, 72, 15, 76.199996948),
+        "arms": (24, 62, 20, 32, 46, 58, 70, 15, 76.199996948),
         "maxima": (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
         "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
         "tank_empty": (49, 43, 49), "tank_full": (49, 43, 49),
@@ -30,7 +30,7 @@ EXPECTED = {
     "737_70NG.acf": {
         "variant": 2, "version": "levelup700-wb-v1",
         "reference_hash": "8cb0d7254e63cd1a2b4fe88071e706393504e6bfce7ab6af3cca417d22ea3c31",
-        "overlay_hash": "a5d2cdd9e7dec57ec42d22a0937f3c08ee56e1adbd7334b87bbfd38fb9a811f2",
+        "overlay_hash": "c106a1b17bb9c4c9210e2e89c0aa8f3faec2bd687fd4794a3232d465766380f8",
         "mass": (82999.61, 49.029998779, 47.189998627, 50.939998627, 14.992128372, 154499.9, 46062.008),
         "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley R"),
         "arms": (29, 69, 22, 34, 46, 58, 70, 15, 80),
@@ -41,7 +41,7 @@ EXPECTED = {
     "737_80NG.acf": {
         "variant": 0, "version": "levelup800-wb-v2",
         "reference_hash": "9315f4110ae8c2b5feb53872ae3d7a6bcc2ff380099b6c925c9734d2d65fbe16",
-        "overlay_hash": "e3bb89129fc2400581fec27e8b2c2947a99b06e0aefc24cb3d40a833fc0f5c1c",
+        "overlay_hash": "1b60040ee59117dac335c79631f77e27be71d60e08ea7b25c95ccf84e1e7b6e1",
         "mass": (91514.04, 59.889999390, 57.869998932, 61.840000153, 14.992127419, 174700.0, 46062.01),
         "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
         "arms": (37, 85, 33.5, 46.5, 58.5, 70.5, 82.5, 15, 99),
@@ -52,7 +52,7 @@ EXPECTED = {
     "737_90NG.acf": {
         "variant": 1, "version": "levelup900-wb-v2",
         "reference_hash": "4b4ec0617e7aa1786be362e9cfe1ab60d92ba1b097e8145e896d31f835f842e9",
-        "overlay_hash": "0134a4d8537ab3f65a79e2eea7f8a0335a0622350bc217ad03a308b025ee8faa",
+        "overlay_hash": "f361f03748ca6047850e8424edd819bc524de4ab2eebbebbe1da352965bafe0a",
         "mass": (94580, 64.650001526, 63.380001068, 67.129997253, 14.993530273, 174700, 46062.008),
         "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
         "arms": (45, 89, 34, 47.5, 65, 77, 91, 15, 108),
@@ -63,7 +63,7 @@ EXPECTED = {
     "737_9ENG.acf": {
         "variant": 4, "version": "levelup900er-wb-v2",
         "reference_hash": "c2c0db2907904fb50fbd281f96d46c90e1191f002ed360bcaed778ba106cfed2",
-        "overlay_hash": "db05c59bf4892be62240b9fcb5ae5a338870d255ae72606c8f2088b4827fe9fb",
+        "overlay_hash": "72cfb578e02e5ebef65c7de9abe960d37f4e36431510ecbc7360d4bef2db1e80",
         "mass": (98495, 65.389999390, 64.879997253, 67.879997253, 14.993530273, 187699.31, 52512.31),
         "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
         "arms": (45, 89, 34, 47.5, 65, 77, 91, 15, 108),

@@ -22,8 +22,8 @@ local z600, mass600, moment600 = core.cg_z(
     data600.empty_mass_kg, data600.empty_cg_z_m, station_masses, data600.stations, fuel_masses, data600.tanks
 )
 near(mass600, 56228.0082836786, 1e-9, "600 gross mass")
-near(moment600, 773372.3328944296, 1e-6, "600 gross moment")
-near(z600, 13.754218875985291, 1e-12, "600 cg z")
+near(moment600, 771543.5328944295, 1e-6, "600 gross moment")
+near(z600, 13.721694159997247, 1e-12, "600 cg z")
 
 local data700 = contracts[2]
 local z700, mass700, moment700 = core.cg_z(

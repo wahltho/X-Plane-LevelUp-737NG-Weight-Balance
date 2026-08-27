@@ -8,8 +8,8 @@ No values are inferred for any MAX variant.
 
 | Field | 737-600 |
 |---|---:|
-| Contract | `levelup600-wb-v1` |
-| Reference SHA-256 | `362f1e5ca26186f527e4924f4e43328dcb3b2e87945b462b8125f237b73da123` |
+| Contract | `levelup600-wb-v2` |
+| Reference SHA-256 | `c808d3536fd938bb76c51e0acf7256bd65bed2a7380eabbec496ccde90a518d4` |
 | Empty mass | `80199.78 lb` |
 | Reference CG | `45.979999542 ft` |
 | Fixed forward/aft | `44.229999542 / 47.700000763 ft` |
@@ -47,7 +47,7 @@ No values are inferred for any MAX variant.
 | Full tank arms | `69 / 62 / 69 ft` | `69 / 62 / 69 ft` |
 
 The current references are
-`/Users/wahltho/Downloads/Level Up/737_60NG.acf`,
+`/Users/wahltho/Downloads/737_60NG.acf`,
 `/Users/wahltho/Downloads/Level Up/737_70NG.acf`, the retained -800 provenance,
 and `/Users/wahltho/Downloads/Level Up/737_90NG.acf` plus `737_9ENG.acf`.
 The SHA-256 values record evidence
@@ -57,8 +57,8 @@ unrelated ACF changes.
 
 ## Payload stations
 
-The -600 uses Cargo 1/2 at `25/63 ft` with `4200/6900 lb` maxima, Zones 1-5
-at `20/33/46/59/72 ft` with `8000 lb` each, and Galley F/A at
+The -600 uses Cargo 1/2 at `24/62 ft` with `4200/6900 lb` maxima, Zones 1-5
+at `20/32/46/58/70 ft` with `8000 lb` each, and Galley F/A at
 `15/76.199996948 ft` with `3000 lb` each. These arms are the aircraft author's
 current test-balloon/WAG geometry and are not independently validated
 real-aircraft station data.
@@ -111,7 +111,8 @@ included in LevelUp ACF empty mass, this made FMC ZFW/GW approximately
 `524 kg / 1.155 klb` low. Three independent -900/-900ER RealBench captures
 showed physical-to-FMC deltas of `1.154`, `1.165` and `1.159 klb`. Release
 v0.3.2 therefore uses `acf_m_empty + sum(m_stations[0..8])` for the initially
-supported LevelUp IDs; v0.4.0 extends the same gate to ID `3`. The station array
+supported LevelUp IDs; v0.4.0 extended the same gate to ID `3`, and v0.4.1
+updates that variant's refined station arms. The station array
 is used instead of aggregate `m_fixed` so the FMC
 consumes the same physical owner during slow loading and external-payload
 operation. The upstream formula remains the fallback for every other ID.
@@ -156,8 +157,8 @@ control case has station masses
 - longitudinal CG: `18.003039482982054 m`.
 
 For the -600, the same explicit station and tank masses give
-`56228.0082836786 kg`, `773372.3328944296 kg m` and
-`13.754218875985291 m`.
+`56228.0082836786 kg`, `771543.5328944295 kg m` and
+`13.721694159997247 m`.
 
 Using the same explicit `8850 kg` station snapshot with `12000 kg` requested
 ramp fuel and the fixed `226.8 kg` taxi allowance, the takeoff state is
@@ -206,12 +207,12 @@ boundaries, not guessed ACF changes.
 
 ## Scope of the reconciled ACFs
 
-Jochen's 2026-08-24 -600 input supplies the V2.S1.51 flightmodel and the
-complete nine-station contract above. The private port reconcile accepts that
-flightmodel and W&B state while preserving the private object table, Collins
-WXR integration and transformed cockpit/default view. Galley roles are
+The 2026-08-27 -600 input refines five arms in the complete nine-station
+contract above. The private port reconcile accepts only that W&B revision and
+retains its documented v2.S1.50C aerodynamic baseline, private object table,
+Collins WXR integration and transformed cockpit/default view. Galley roles are
 normalized to service/cargo role `1`; the public semantic gate deliberately
-does not consume the X-Plane UI role category.
+does not consume the X-Plane UI role category or unrelated aerodynamic fields.
 
 Compared with the first 800 contract, Jochen's 2026-08-20 file moves Cargo 1
 from `36` to `37 ft`, moves all five passenger zones aft by `2.5 ft`, moves

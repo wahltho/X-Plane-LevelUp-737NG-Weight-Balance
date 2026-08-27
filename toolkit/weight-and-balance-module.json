@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "manifestType": "levelup-compatibility-module-source",
   "moduleId": "weight-and-balance",
-  "moduleVersion": "0.4.0",
+  "moduleVersion": "0.4.1",
   "displayName": "LevelUp 737NG Weight and Balance",
   "description": "Variant-specific X-Plane station ownership, current and predicted CG, FMC CG and takeoff-trim integration.",
   "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
@@ -64,7 +64,7 @@
     {
       "path": "B738.tablet_levelup_ng_wb_data.lua",
       "size": 9920,
-      "sha256": "5d043bf97af3fc9d3108567fa01fb8b1abe8a6ed7aa1de80a09d8c2d67b80dce"
+      "sha256": "c1179349f006a2d5551ad4721e0018e4069aa4e27b13efebb4160b3e4c91d17e"
     },
     {
       "path": "B738.tablet_levelup_ng_wb_core.lua",
@@ -77,9 +77,9 @@
       "sha256": "49c9f1c9c447feed6308f66a6ae69a77da347959b6c6db92cbb3b22cf15d6ae9"
     },
     {
-      "path": "contracts/levelup-ng-wb-acf-v0.4.0.json",
+      "path": "contracts/levelup-ng-wb-acf-v0.4.1.json",
       "size": 14561,
-      "sha256": "cb0bc33212a9e5bd5c416c3e862fd1e3736ffe3db815e82f6d7889794607793d"
+      "sha256": "282199585ab699b7845a516b89e54031714a06907efbe249e2f50349050d1e41"
     }
   ],
   "targets": [
@@ -102,7 +102,7 @@
       "operation": "copy-file-v1",
       "payload": "B738.tablet_levelup_ng_wb_data.lua",
       "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
-      "resultSha256": "5d043bf97af3fc9d3108567fa01fb8b1abe8a6ed7aa1de80a09d8c2d67b80dce"
+      "resultSha256": "c1179349f006a2d5551ad4721e0018e4069aa4e27b13efebb4160b3e4c91d17e"
     },
     {
       "operation": "copy-file-v1",
@@ -118,9 +118,9 @@
     }
   ],
   "acfContract": {
-    "path": "contracts/levelup-ng-wb-acf-v0.4.0.json",
+    "path": "contracts/levelup-ng-wb-acf-v0.4.1.json",
     "size": 14561,
-    "sha256": "cb0bc33212a9e5bd5c416c3e862fd1e3736ffe3db815e82f6d7889794607793d"
+    "sha256": "282199585ab699b7845a516b89e54031714a06907efbe249e2f50349050d1e41"
   },
   "toolkitIntegration": {
     "transactionModel": "LevelUp compatibility package schema 3",

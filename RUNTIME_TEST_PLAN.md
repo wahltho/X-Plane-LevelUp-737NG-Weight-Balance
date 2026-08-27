@@ -19,7 +19,7 @@ Capture for every case:
 Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all five ACF contracts pass the v0.4.0 installer. A whole-file hash may
+1. Confirm all five ACF contracts pass the v0.4.1 installer. A whole-file hash may
    differ after unrelated flight-model tuning.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
@@ -64,7 +64,7 @@ Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/
 5. Repeat representative cases with the performance patch installed before
    and after this W&B package.
 6. Upgrade an aircraft with -700 v0.1.4 installed. Verify the original backup
-   remains unchanged, only five common Tablet v0.4.0 blocks plus two FMS blocks
+   remains unchanged, only five common Tablet v0.4.1 blocks plus two FMS blocks
    remain, and all five
    supported variants load.
 7. Upgrade an aircraft with v0.2.0 installed and Jochen's revised 800 ACF.

@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 MODULE_MANIFEST = REPOSITORY / "toolkit/weight-and-balance-module.json"
-ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.4.0.json"
+ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.4.1.json"
 TABLET_LOADER_PATCH = REPOSITORY / "patches/B738.tablet.loader.json"
 TABLET_PATCH = REPOSITORY / "patches/B738.tablet.lua.json"
 FMS_PATCH = REPOSITORY / "patches/B738.a_fms.lua.json"
@@ -71,7 +71,7 @@ manifest = json.loads(MODULE_MANIFEST.read_text(encoding="utf-8"))
 assert manifest["schemaVersion"] == 1
 assert manifest["manifestType"] == "levelup-compatibility-module-source"
 assert manifest["moduleId"] == "weight-and-balance"
-assert manifest["moduleVersion"] == "0.4.0"
+assert manifest["moduleVersion"] == "0.4.1"
 assert manifest["toolkitIntegration"]["directCatalogEntry"] is False
 assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [3, 2, 0, 1, 4]
 
@@ -132,7 +132,7 @@ installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
 contract = json.loads(ACF_CONTRACT.read_text(encoding="utf-8"))
 assert contract["schemaVersion"] == 1
-assert contract["packageVersion"] == "0.4.0"
+assert contract["packageVersion"] == "0.4.1"
 json_contracts = {entry["name"]: entry for entry in contract["variants"]}
 installer_contracts = {entry["name"]: entry for entry in installer.ACF_CONTRACTS}
 assert set(json_contracts) == set(installer_contracts)

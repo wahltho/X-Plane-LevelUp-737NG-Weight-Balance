@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.1 - 2026-08-27
+
+- Updates the 737-600 semantic contract to `levelup600-wb-v2` for the refined
+  `24/62/20/32/46/58/70/15/76.199996948 ft` station arms.
+- Retains the existing -600 empty mass, reference CG, CG limits, MAC, station
+  names and maxima, service-load ownership and constant fuel-tank geometry.
+- Reconciles only those five changed W&B arms into the private overlay and
+  intentionally excludes the accompanying elevator, flap and generated
+  geometry changes from the private aerodynamic baseline.
+- Updates the independent moment oracle, semantic installer gate and Toolkit
+  module contract. FMC trim and VREF logic remain unchanged.
+
 ## 0.4.0 - 2026-08-25
 
 - Adds Jochen Heiden's V2.S1.51 737-600 ACF as `levelup600-wb-v1`

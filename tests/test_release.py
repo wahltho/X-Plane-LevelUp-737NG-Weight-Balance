@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.4.0.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.4.1.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -42,12 +42,13 @@ EXPECTED = {
     "ACF_RECONCILE_2026_08_22.md",
     "ACF_RECONCILE_2026_08_23.md",
     "ACF_RECONCILE_2026_08_25.md",
+    "ACF_RECONCILE_2026_08_27.md",
     "CHANGELOG.md",
     "LICENSE",
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.4.0.json",
+    "contracts/levelup-ng-wb-acf-v0.4.1.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -95,7 +96,7 @@ with zipfile.ZipFile(ARCHIVE) as archive:
             capture_output=True, text=True, check=False,
         )
         assert completed.returncode == 0, completed.stdout + completed.stderr
-        assert "Verified levelup600-wb-v1" in completed.stdout
+        assert "Verified levelup600-wb-v2" in completed.stdout
         assert "Verified levelup700-wb-v1" in completed.stdout
         assert "Verified levelup800-wb-v2" in completed.stdout
         assert "Verified levelup900-wb-v2" in completed.stdout
@@ -107,4 +108,4 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 
-print("PASS: v0.4.0 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")
+print("PASS: v0.4.1 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")

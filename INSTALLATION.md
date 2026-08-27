@@ -5,7 +5,7 @@
 - LevelUp 737NG Series using upstream Zibo 4.05.35 Tablet Lua and the
   unmodified upstream `zibomod.xpl`.
 - `737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` matching
-  `levelup600-wb-v1`, `levelup700-wb-v1`, `levelup800-wb-v2`, `levelup900-wb-v2` and
+  `levelup600-wb-v2`, `levelup700-wb-v1`, `levelup800-wb-v2`, `levelup900-wb-v2` and
   `levelup900er-wb-v2`. Unrelated flight-model changes are allowed.
 - Python 3. No compiler or plugin build is required.
 
@@ -21,7 +21,7 @@ of its Galley F/A roles are both accepted.
 2. Back up the LevelUp test aircraft.
 3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
 4. Extract every file from
-   `LevelUp-737NG-Weight-Balance-v0.4.0.zip` directly into that folder. Do not
+   `LevelUp-737NG-Weight-Balance-v0.4.1.zip` directly into that folder. Do not
    create another subfolder.
 5. Run one of:
 
@@ -33,7 +33,7 @@ of its Galley F/A roles are both accepted.
 
 The installer must report:
 
-- package payload `v0.4.0` verified;
+- package payload `v0.4.1` verified;
 - all five ACF contracts verified;
 - Lua syntax passed when `luac` is available;
 - LevelUp 737NG W&B hooks installed.
@@ -51,7 +51,7 @@ from the -700-only v0.1.x package keeps
 marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
 required after installing or upgrading.
 
-For an existing v0.2.0 through v0.3.1 installation, extract v0.4.0 over
+For an existing v0.2.0 through v0.4.0 installation, extract v0.4.1 over
 the same Tablet folder and run the installer normally. Do not uninstall first.
 The five common Tablet hooks are unchanged. The installer adds two marked
 blocks to the sibling `B738.a_fms/B738.a_fms.lua` and verifies all five current
