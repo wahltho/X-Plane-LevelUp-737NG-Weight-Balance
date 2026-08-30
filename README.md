@@ -3,7 +3,7 @@
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
 `737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.4.1`
+unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.4.2`
 supports Variant-IDs `3/2/0/1/4` (`737-600/-700/-800/-900/-900ER`) from one package.
 Every MAX variant and stock Zibo delegate to the original Tablet
 functions.
@@ -13,7 +13,7 @@ The initial standalone repository import is derived from the committed
 Future public LevelUp W&B patch development belongs here; the private C++ port
 remains owned by the Zibo Mod repository.
 
-`v0.4.1` supersedes the -700-only `v0.1.4` and common
+`v0.4.2` supersedes the -700-only `v0.1.4` and common
 `v0.2.0`/`v0.2.1`/`v0.2.2`/`v0.2.3`
 packages. The installer migrates the five old `LEVELUP_700_WB` blocks in place,
 preserves the original v0.1.x backup and installs the common adapter only after
@@ -32,6 +32,10 @@ Release v0.4.0 added Jochen's first V2.S1.51 -600 contract to that complete owne
 Release v0.4.1 follows the refined -600 station geometry by moving Cargo1,
 Cargo2, Zone 2, Zone 4 and Zone 5 forward while leaving all other W&B fields
 and unrelated flight-model tuning outside the semantic contract.
+Release v0.4.2 fixes a false installer rejection by using only a Lua
+5.1-compatible compiler for optional whole-file validation. Lua 5.4 treats an
+upstream Zibo `for ii` control variable as constant; XLua/LuaJIT uses Lua 5.1
+semantics. No W&B hook or runtime behavior changed.
 
 ## Owner contract
 
@@ -81,8 +85,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.4.1.zip`
-- `LevelUp-737NG-Weight-Balance-v0.4.1.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.4.2.zip`
+- `LevelUp-737NG-Weight-Balance-v0.4.2.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:

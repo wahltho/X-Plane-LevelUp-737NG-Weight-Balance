@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "manifestType": "levelup-compatibility-module-source",
   "moduleId": "weight-and-balance",
-  "moduleVersion": "0.4.1",
+  "moduleVersion": "0.4.2",
   "displayName": "LevelUp 737NG Weight and Balance",
   "description": "Variant-specific X-Plane station ownership, current and predicted CG, FMC CG and takeoff-trim integration.",
   "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",

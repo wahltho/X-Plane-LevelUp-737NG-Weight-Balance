@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.4.1.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.4.2.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -108,4 +108,4 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 
-print("PASS: v0.4.1 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")
+print("PASS: v0.4.2 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")

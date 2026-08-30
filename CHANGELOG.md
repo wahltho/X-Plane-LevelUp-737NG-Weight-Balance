@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.2 - 2026-08-30
+
+- Restricts the optional whole-file Lua syntax check to a Lua 5.1-compatible
+  `luac`, matching X-Plane XLua/LuaJIT semantics.
+- Skips incompatible system compilers such as Lua 5.4, which reject an
+  assignment to the upstream Zibo FMS `for ii` control variable even though
+  the same Lua is valid under XLua.
+- Keeps validation transactional and leaves all W&B contracts, Tablet/FMS
+  hooks and runtime behavior unchanged.
+
 ## 0.4.1 - 2026-08-27
 
 - Updates the 737-600 semantic contract to `levelup600-wb-v2` for the refined

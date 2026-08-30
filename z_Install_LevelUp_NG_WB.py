@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import math
+import re
 import shutil
 import subprocess
 import sys
@@ -389,10 +390,36 @@ def remove_block(lines: list[str], begin: str, end: str, replacement: list[str] 
     return True
 
 
+def find_lua51_compiler() -> str | None:
+    incompatible: list[str] = []
+    seen: set[str] = set()
+    for command in ("luac5.1", "luac-5.1", "luac"):
+        compiler = shutil.which(command)
+        if compiler is None or compiler in seen:
+            continue
+        seen.add(compiler)
+        version = subprocess.run(
+            [compiler, "-v"], capture_output=True, text=True, check=False
+        )
+        banner = " ".join(part.strip() for part in (version.stdout, version.stderr) if part.strip())
+        if version.returncode == 0 and re.search(r"\bLua\s+5\.1(?:\.\d+)?\b", banner):
+            return compiler
+        incompatible.append(f"{compiler} ({banner or 'unknown version'})")
+
+    if incompatible:
+        print(
+            "Lua syntax check skipped: available luac is not Lua 5.1 compatible: "
+            + ", ".join(incompatible)
+            + ". X-Plane XLua uses LuaJIT/Lua 5.1 semantics."
+        )
+    else:
+        print("Lua syntax check skipped: Lua 5.1-compatible luac not found.")
+    return None
+
+
 def validate_lua(payload: bytes, label: str = "Lua file") -> None:
-    compiler = shutil.which("luac")
+    compiler = find_lua51_compiler()
     if compiler is None:
-        print("Lua syntax check skipped: luac not found.")
         return
     temporary_path: Path | None = None
     try:

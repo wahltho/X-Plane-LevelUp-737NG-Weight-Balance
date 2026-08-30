@@ -185,6 +185,8 @@ def exercise_windows_luac_temporary_file_contract() -> None:
         return temporary
 
     def run_luac(arguments: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        if arguments == ["C:/Lua/luac.exe", "-v"]:
+            return subprocess.CompletedProcess(arguments, 0, "Lua 5.1.5", "")
         assert temporary is not None and temporary.closed
         assert arguments == ["C:/Lua/luac.exe", "-p", str(fake_path)]
         assert fake_path.read_bytes() == payload
@@ -194,7 +196,7 @@ def exercise_windows_luac_temporary_file_contract() -> None:
     original_named_temporary_file = installer.tempfile.NamedTemporaryFile
     original_run = installer.subprocess.run
     try:
-        installer.shutil.which = lambda _: "C:/Lua/luac.exe"
+        installer.shutil.which = lambda command: "C:/Lua/luac.exe" if command == "luac" else None
         installer.tempfile.NamedTemporaryFile = named_temporary_file
         installer.subprocess.run = run_luac
         installer.validate_lua(payload)
@@ -208,6 +210,31 @@ def exercise_windows_luac_temporary_file_contract() -> None:
         fake_path.parent.rmdir()
 
 
+def exercise_incompatible_luac_is_not_used() -> None:
+    calls: list[list[str]] = []
+
+    def run_luac(arguments: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        calls.append(arguments)
+        assert arguments == ["/usr/bin/luac", "-v"]
+        return subprocess.CompletedProcess(arguments, 0, "Lua 5.4.8", "")
+
+    original_which = installer.shutil.which
+    original_named_temporary_file = installer.tempfile.NamedTemporaryFile
+    original_run = installer.subprocess.run
+    try:
+        installer.shutil.which = lambda command: "/usr/bin/luac" if command == "luac" else None
+        installer.tempfile.NamedTemporaryFile = lambda **_: (_ for _ in ()).throw(
+            AssertionError("Lua 5.4 must be rejected before creating a temporary file")
+        )
+        installer.subprocess.run = run_luac
+        installer.validate_lua(b"this payload must not be passed to Lua 5.4")
+        assert calls == [["/usr/bin/luac", "-v"]]
+    finally:
+        installer.shutil.which = original_which
+        installer.tempfile.NamedTemporaryFile = original_named_temporary_file
+        installer.subprocess.run = original_run
+
+
 def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool = False) -> None:
     temporary, folder = setup(line_ending, performance_blocks, descent_blocks)
     try:
@@ -217,8 +244,8 @@ def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool 
         fms_original = fms_target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.4.1" in first.stdout
-        assert "Verified package payload: v0.4.1" in first.stdout
+        assert "Installed v0.4.2" in first.stdout
+        assert "Verified package payload: v0.4.2" in first.stdout
         assert "Verified levelup600-wb-v2" in first.stdout
         assert "Verified levelup700-wb-v1" in first.stdout
         assert "Verified levelup800-wb-v2" in first.stdout
@@ -370,7 +397,7 @@ def exercise_v014_upgrade() -> None:
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
         result = run(folder)
-        assert "Installed v0.4.1" in result.stdout
+        assert "Installed v0.4.2" in result.stdout
         upgraded = target.read_text(encoding="utf-8")
         assert "LEVELUP_700_WB" not in upgraded
         assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
@@ -424,9 +451,9 @@ def exercise_v020_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.1" in result.stdout
+        assert "Verified package payload: v0.4.2" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.1" in result.stdout
+        assert "Installed v0.4.2" in result.stdout
         assert target.read_bytes() == installed_v020
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v020
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -488,10 +515,10 @@ def exercise_v021_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.1" in result.stdout
+        assert "Verified package payload: v0.4.2" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.1" in result.stdout
+        assert "Installed v0.4.2" in result.stdout
         assert target.read_bytes() == installed_v021
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v021
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -518,10 +545,10 @@ def exercise_v022_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.1" in result.stdout
+        assert "Verified package payload: v0.4.2" in result.stdout
         assert "Verified levelup700-wb-v1" in result.stdout
         assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.1" in result.stdout
+        assert "Installed v0.4.2" in result.stdout
         assert target.read_bytes() == installed_v022
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v022
         fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
@@ -567,6 +594,7 @@ def exercise_fms_zfw_formula_oracle() -> None:
 assert BASELINE.is_file(), BASELINE
 assert FMS_BASELINE.is_file(), FMS_BASELINE
 exercise_windows_luac_temporary_file_contract()
+exercise_incompatible_luac_is_not_used()
 exercise(b"\n", False)
 exercise(b"\r\n", False)
 exercise(b"\n", True)
@@ -584,4 +612,4 @@ exercise_wrong_acf("737_70NG.acf", "levelup700-wb-v1")
 exercise_wrong_acf("737_80NG.acf", "levelup800-wb-v2")
 exercise_wrong_acf("737_90NG.acf", "levelup900-wb-v2")
 exercise_wrong_acf("737_9ENG.acf", "levelup900er-wb-v2")
-print("PASS: Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy migration, five ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")
+print("PASS: Lua 5.1 compiler selection, Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy migration, five ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")

@@ -71,7 +71,7 @@ manifest = json.loads(MODULE_MANIFEST.read_text(encoding="utf-8"))
 assert manifest["schemaVersion"] == 1
 assert manifest["manifestType"] == "levelup-compatibility-module-source"
 assert manifest["moduleId"] == "weight-and-balance"
-assert manifest["moduleVersion"] == "0.4.1"
+assert manifest["moduleVersion"] == "0.4.2"
 assert manifest["toolkitIntegration"]["directCatalogEntry"] is False
 assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [3, 2, 0, 1, 4]
 

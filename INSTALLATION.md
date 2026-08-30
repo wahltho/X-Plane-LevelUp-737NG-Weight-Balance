@@ -21,7 +21,7 @@ of its Galley F/A roles are both accepted.
 2. Back up the LevelUp test aircraft.
 3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
 4. Extract every file from
-   `LevelUp-737NG-Weight-Balance-v0.4.1.zip` directly into that folder. Do not
+   `LevelUp-737NG-Weight-Balance-v0.4.2.zip` directly into that folder. Do not
    create another subfolder.
 5. Run one of:
 
@@ -33,9 +33,10 @@ of its Galley F/A roles are both accepted.
 
 The installer must report:
 
-- package payload `v0.4.1` verified;
+- package payload `v0.4.2` verified;
 - all five ACF contracts verified;
-- Lua syntax passed when `luac` is available;
+- Lua syntax passed when a Lua 5.1-compatible `luac` is available, or skipped
+  with an informational message for incompatible system compilers;
 - LevelUp 737NG W&B hooks installed.
 
 For an aircraft root outside the normal four-parent layout, use:
@@ -51,7 +52,7 @@ from the -700-only v0.1.x package keeps
 marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
 required after installing or upgrading.
 
-For an existing v0.2.0 through v0.4.0 installation, extract v0.4.1 over
+For an existing v0.2.0 through v0.4.1 installation, extract v0.4.2 over
 the same Tablet folder and run the installer normally. Do not uninstall first.
 The five common Tablet hooks are unchanged. The installer adds two marked
 blocks to the sibling `B738.a_fms/B738.a_fms.lua` and verifies all five current
@@ -59,6 +60,10 @@ ACF contracts. Existing marked VNAV descent-table and Tablet performance
 patches are preserved.
 
 The v0.2.3 Windows `luac.exe` temporary-file fix remains included.
+
+Release v0.4.2 additionally ignores Lua 5.2 through 5.4 system compilers for
+whole-file validation because the embedded Zibo Lua targets XLua/LuaJIT 5.1
+semantics. Patch anchors and ACF contracts are still validated normally.
 
 The installer tolerates other marked compatibility patches and both LF and
 CRLF line endings. It refuses an unsupported stock Tablet structure or a
