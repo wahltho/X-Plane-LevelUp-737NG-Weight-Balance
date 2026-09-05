@@ -121,7 +121,68 @@ local function independent_mac(variant, stations, fuel)
 end
 
 local zfw_offset_value = 0
+local frozen = dofile(package_root .. "/tests/fixtures/wb_v041.lua")
+local live = {}
+local metadata_changes = {}
+file_path = "/fixture/"
+local function install_geometry(variant)
+    local data = frozen[variant]
+    live["sim/aircraft/view/acf_relative_path"] = "Aircraft/fixture/" .. data.acf_name
+    live["sim/aircraft/weight/acf_m_empty"] = data.empty_mass_kg
+    live["sim/aircraft/weight/acf_m_max"] = data.max_gross_mass_kg
+    live["sim/aircraft/weight/acf_cgZ_original"] = data.empty_cg_z_m / FT_TO_M
+    live["sim/aircraft/weight/acf_m_fuel_tot"] = literal[variant].fuel_total * LB_TO_KG
+    local arms, maxima, empty, full, ratios = {}, {}, {}, {}, {}
+    for i = 0, 8 do
+        arms[i], maxima[i] = data.stations[i + 1].arm_m, data.stations[i + 1].max_kg
+        ratios[i] = i < 3 and ({0.187000006, 0.625999987, 0.187000006})[i + 1] or 0
+        empty[i] = i < 3 and data.tanks[i + 1].empty_arm_m - data.empty_cg_z_m or 0
+        full[i] = i < 3 and data.tanks[i + 1].full_arm_m - data.empty_cg_z_m or 0
+    end
+    live["sim/aircraft/weight/acf_stations_ref_z"] = arms
+    live["sim/aircraft/weight/acf_m_station_max"] = maxima
+    live["sim/aircraft/overflow/acf_tank_Z"] = empty
+    live["sim/aircraft/overflow/acf_tank_Z_full"] = full
+    live["sim/aircraft/overflow/acf_tank_rat"] = ratios
+end
+
+-- In-memory ACF metadata from frozen author input, not the new production
+-- data module. No real user aircraft files are read or written by this test.
+local real_open = io.open
+local metadata_reads = 0
+io.open = function(path, mode)
+    if not path:match("^/fixture/") then return real_open(path, mode) end
+    assert(mode == "r", "ACFs are read-only")
+    metadata_reads = metadata_reads + 1
+    local data = frozen[B738DR_b737_variant]
+    assert(path == "/fixture/" .. data.acf_name)
+    local fields = {
+        ["_fixed_max/count"] = 9, ["_fixed_name/count"] = 9,
+        ["_fixed_ref/i_count"] = 9, ["_fixed_ref/j_count"] = 3,
+        ["_fixed_role/count"] = 9, ["_tank_name/count"] = 9,
+        ["_tank_rat/count"] = 9, ["_tank_xyz/i_count"] = 9, ["_tank_xyz/j_count"] = 3,
+        ["_tank_xyz_full/i_count"] = 9, ["_tank_xyz_full/j_count"] = 3,
+        ["_average_mac_acf"] = data.mac_m / FT_TO_M,
+        ["_cgZ_fwd"] = data.cg_fwd_z_m / FT_TO_M,
+        ["_cgZ_aft"] = data.cg_aft_z_m / FT_TO_M,
+    }
+    for i = 0, 8 do fields["_fixed_name/" .. i] = data.stations[i + 1].name end
+    fields["_tank_name/0"] = "Left Main"
+    fields["_tank_name/1"] = "Center Wing"
+    fields["_tank_name/2"] = B738DR_b737_variant == 3 and "Right Wing" or "Right Main"
+    for key, value in pairs(metadata_changes) do fields[key] = value end
+    local rows = {}
+    for key, value in pairs(fields) do
+        rows[#rows + 1] = "P acf/" .. key .. " " .. tostring(value)
+    end
+    return { close = function() end, lines = function()
+        local i = 0
+        return function() i = i + 1; return rows[i] end
+    end }
+end
+
 local function establish_xplane_reference(variant, stations)
+    install_geometry(variant)
     local actual_fuel = { 3000, 5000, 3000 }
     local current_zfw_m = independent_cg(variant, stations, nil)
     local current_gross_m = independent_cg(variant, stations, actual_fuel)
@@ -148,9 +209,11 @@ setmetatable(_G, {
 })
 
 function find_dataref(name)
-    assert(name == "sim/flightmodel2/misc/zfw_cg_offset_z")
     return {
-        __get = function() return zfw_offset_value end,
+        __get = function()
+            if name == "sim/flightmodel2/misc/zfw_cg_offset_z" then return zfw_offset_value end
+            return live[name]
+        end,
         __set = function(_, value) zfw_offset_value = value end,
         dref = name,
     }
@@ -168,6 +231,8 @@ check_gw = function() return "stock_gw" end
 check_zfw = function() return "stock_zfw" end
 check_lw = function() return "stock_lw" end
 after_physics = function() stock_calls = stock_calls + 10 end
+local flight_starts = 0
+flight_start = function() flight_starts = flight_starts + 1 end
 B738CMD_change_payload = { once = function() stock_calls = stock_calls + 100 end }
 total_payload_entry = function() stock_calls = stock_calls + 1000 end
 
@@ -298,6 +363,77 @@ zfw_offset_value = 100
 adapter.frame_update()
 assert(B738DR_calc_to_cg == 0, "invalid X-Plane datum must suppress FMC CG instead of publishing a guess")
 
+-- Dynamic numeric geometry must change the result, not merely pass a gate.
+-- The current physical stations are zero, so changing an arm cannot alter
+-- the independent empty-aircraft datum used for these forecast comparisons.
+B738DR_ext_payload = 0
+for i = 0, 8 do simDR_payload_stations[i] = 0 end
+establish_xplane_reference(4, empty_stations)
+adapter.begin_frame()
+local before_zfw, before_tow, before_lw = calc_zfw_mac(), calc_mac(1), calc_des_mac(2000)
+local reads_before = metadata_reads
+live["sim/aircraft/weight/acf_stations_ref_z"][2] =
+    live["sim/aircraft/weight/acf_stations_ref_z"][2] + 1.0
+adapter.begin_frame()
+local mass_zfw = literal[4].empty_mass + 6377
+-- 6377 = independent sum of the nine selected station targets above.
+local delta_zfw = 920 / mass_zfw / literal[4].mac * 100
+assert(math.abs(calc_zfw_mac() - before_zfw - delta_zfw) < 1e-9, "live station arm in ZFW")
+assert(math.abs(calc_mac(1) - before_tow - 920 / (mass_zfw + 9773.2) / literal[4].mac * 100) < 1e-9,
+    "same live station arm in TOW/FMC")
+assert(math.abs(calc_des_mac(2000) - before_lw - 920 / (mass_zfw + 2000) / literal[4].mac * 100) < 1e-9,
+    "same live station arm in LW")
+assert(metadata_reads == reads_before, "no per-frame ACF file reads")
+
+-- Corrupt geometry must never hand ownership back to the stock mass writers.
+live["sim/aircraft/weight/acf_m_station_max"][0] = 0
+local stock_before = stock_calls
+adapter.frame_update()
+update_payload()
+B738CMD_change_payload:once()
+assert(adapter.owns_payload() and stock_calls == stock_before)
+assert(B738DR_calc_to_cg == 0 and calc_zfw_mac() == 0 and calc_oew_mac() == 0)
+assert(not check_tow(50000, 22))
+for i = 0, 8 do assert(simDR_payload_stations[i] == 0) end
+assert(calc_mac(0) == simDR_cg_z_mac, "physical current CG remains available")
+
+-- Same-ID reload must reread metadata; wrong order blocks, valid reload recovers.
+metadata_changes["_fixed_name/2"] = "Cargo1"
+flight_start()
+adapter.frame_update()
+assert(flight_starts == 1 and B738DR_calc_to_cg == 0)
+metadata_changes = {}
+establish_xplane_reference(4, empty_stations)
+flight_start()
+adapter.begin_frame()
+assert(flight_starts == 2 and calc_zfw_mac() > 0)
+assert(metadata_reads == reads_before + 2)
+
+-- A changed MAC on same-ID reload must replace the old conversion scale.
+local old_mac = literal[4].mac
+literal[4].mac = old_mac + 0.1
+metadata_changes["_average_mac_acf"] = literal[4].mac / FT_TO_M
+establish_xplane_reference(4, empty_stations)
+flight_start()
+adapter.begin_frame()
+assert(math.abs(calc_zfw_mac() - independent_mac(4, selected, nil)) < 1e-9)
+literal[4].mac = old_mac
+metadata_changes = {}
+establish_xplane_reference(4, empty_stations)
+flight_start()
+adapter.begin_frame()
+
+-- External entry handlers may not normalize selections or mutate station mass.
+B738DR_ext_payload = 1
+zone_cargo1, zone_cargo2 = 99999, 99999
+update_payload()
+total_payload_entry("12345")
+assert(zone_cargo1 == 99999 and zone_cargo2 == 99999)
+for i = 0, 8 do assert(simDR_payload_stations[i] == 0) end
+io.open = real_open
+
+B738DR_calc_to_cg = 22
 B738DR_b737_variant = 6
 assert(check_tow(1, 1) == "stock_tow", "variant switch must relinquish envelope ownership")
+assert(B738DR_calc_to_cg == 0, "variant retirement must not retain our previous handoff")
 print("PASS: -600/-700/-800/-900/-900ER owners, ACF tank arms, exact cargo limits, external read-only and delegation")

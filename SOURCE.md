@@ -1,5 +1,9 @@
 # Evidence and derivation
 
+For 0.5.0, see `DYNAMIC_AIRCRAFT_DATA.md` and `VALIDATION_0.5.0.md`. The numeric tables
+below remain historical provenance and regression inputs, not runtime lookup
+tables or exact installation requirements. No new author ACF was adopted.
+
 This test balloon covers `737_60NG.acf`/ID `3`, `737_70NG.acf`/ID `2`,
 `737_80NG.acf`/ID `0`, `737_90NG.acf`/ID `1` and `737_9ENG.acf`/ID `4`.
 No values are inferred for any MAX variant.

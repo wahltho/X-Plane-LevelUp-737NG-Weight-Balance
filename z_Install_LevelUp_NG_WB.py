@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import math
 import re
 import shutil
@@ -23,114 +24,10 @@ MANIFEST_FILE = Path("levelup-ng-wb-package-manifest.txt")
 PACKAGE_ID = "levelup-737ng-weight-balance-test-balloon"
 
 
-def make_acf_contract(
-    version: str,
-    name: str,
-    empty_mass: float,
-    cg_z: float,
-    cg_fwd: float,
-    cg_aft: float,
-    mac: float,
-    max_mass: float,
-    fuel_mass: float,
-    station_names: tuple[str, ...],
-    station_arms: tuple[float, ...],
-    station_maxima: tuple[float, ...],
-    tank_empty_arms: tuple[float, ...],
-    tank_full_arms: tuple[float, ...],
-    tank_names: tuple[str, str, str] = ("Left Main", "Center Wing", "Right Main"),
-) -> dict[str, object]:
-    text_fields = {
-        "acf/_tank_name/0": tank_names[0],
-        "acf/_tank_name/1": tank_names[1],
-        "acf/_tank_name/2": tank_names[2],
-    }
-    number_fields = {
-        "acf/_m_empty": empty_mass,
-        "acf/_cgZ": cg_z,
-        "acf/_cgZ_fwd": cg_fwd,
-        "acf/_cgZ_aft": cg_aft,
-        "acf/_average_mac_acf": mac,
-        "acf/_m_max": max_mass,
-        "acf/_m_fuel_max_tot": fuel_mass,
-        "acf/_fixed_max/count": 9,
-        "acf/_fixed_name/count": 9,
-        "acf/_fixed_ref/i_count": 9,
-        "acf/_fixed_ref/j_count": 3,
-        "acf/_fixed_role/count": 9,
-        "acf/_tank_name/count": 9,
-        "acf/_tank_rat/count": 9,
-        "acf/_tank_xyz/i_count": 9,
-        "acf/_tank_xyz/j_count": 3,
-        "acf/_tank_xyz_full/i_count": 9,
-        "acf/_tank_xyz_full/j_count": 3,
-    }
-    tank_ratios = (0.187000006, 0.625999987, 0.187000006, 0, 0, 0, 0, 0, 0)
-    all_tank_empty_arms = (*tank_empty_arms, 0, 0, 0, 0, 0, 0)
-    all_tank_full_arms = (*tank_full_arms, 0, 0, 0, 0, 0, 0)
-    for index in range(9):
-        text_fields[f"acf/_fixed_name/{index}"] = station_names[index]
-        number_fields[f"acf/_fixed_ref/{index},2"] = station_arms[index]
-        number_fields[f"acf/_fixed_max/{index}"] = station_maxima[index]
-        number_fields[f"acf/_tank_rat/{index}"] = tank_ratios[index]
-        number_fields[f"acf/_tank_xyz/{index},2"] = all_tank_empty_arms[index]
-        number_fields[f"acf/_tank_xyz_full/{index},2"] = all_tank_full_arms[index]
-    return {"version": version, "name": name, "text": text_fields, "number": number_fields}
-
-
-ACF_CONTRACTS = (
-    make_acf_contract(
-        "levelup600-wb-v2", "737_60NG.acf",
-        80199.78, 45.979999542, 44.229999542, 47.700000763, 14.878139496,
-        124499.8, 46062.01,
-        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        (24, 62, 20, 32, 46, 58, 70, 15, 76.199996948),
-        (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
-        (49, 43, 49),
-        (49, 43, 49),
-        ("Left Main", "Center Wing", "Right Wing"),
-    ),
-    make_acf_contract(
-        "levelup700-wb-v1", "737_70NG.acf",
-        82999.61, 49.029998779, 47.189998627, 50.939998627, 14.992128372,
-        154499.9, 46062.008,
-        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley R"),
-        (29, 69, 22, 34, 46, 58, 70, 15, 80),
-        (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
-        (52.650001526, 46, 52.650001526),
-        (52.650001526, 46, 52.650001526),
-    ),
-    make_acf_contract(
-        "levelup800-wb-v2", "737_80NG.acf",
-        91514.04, 59.889999390, 57.869998932, 61.840000153, 14.992127419,
-        174700.0, 46062.01,
-        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        (37, 85, 33.5, 46.5, 58.5, 70.5, 82.5, 15, 99),
-        (7848, 10690, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        (64, 56.5, 64),
-        (64, 56.5, 64),
-    ),
-    make_acf_contract(
-        "levelup900-wb-v2", "737_90NG.acf",
-        94580.0, 64.650001526, 63.380001068, 67.129997253, 14.993530273,
-        174700.0, 46062.008,
-        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        (45, 89, 34, 47.5, 65, 77, 91, 15, 108),
-        (7848, 10690, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        (69, 62, 69),
-        (69, 62, 69),
-    ),
-    make_acf_contract(
-        "levelup900er-wb-v2", "737_9ENG.acf",
-        98495.0, 65.389999390, 64.879997253, 67.879997253, 14.993530273,
-        187699.31, 52512.31,
-        ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        (45, 89, 34, 47.5, 65, 77, 91, 15, 108),
-        (7848, 10500, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        (69, 62, 69),
-        (69, 62, 69),
-    ),
-)
+# Numeric geometry belongs to the loaded aircraft. This schema-1 contract
+# retains only the supported station/tank layout for both install paths.
+ACF_CONTRACT_PATH = Path(__file__).resolve().parent / "contracts/levelup-ng-wb-acf-v0.5.0.json"
+ACF_CONTRACTS = tuple(json.loads(ACF_CONTRACT_PATH.read_text(encoding="utf-8"))["variants"])
 
 PAYLOADS = (
     Path("B738.tablet_levelup_ng_wb_data.lua"),
@@ -240,10 +137,11 @@ def verify_package() -> str:
         print(f"ERROR: invalid or incompatible {MANIFEST_FILE}.", file=sys.stderr)
         raise SystemExit(2)
 
-    required = (*PAYLOADS, *FRAGMENTS, Path("z_Install_LevelUp_NG_WB.py"))
+    required = (*PAYLOADS, *FRAGMENTS, Path("z_Install_LevelUp_NG_WB.py"),
+                Path("contracts/levelup-ng-wb-acf-v0.5.0.json"))
     for path in required:
         require(path)
-        expected = payloads.get(path.name)
+        expected = payloads.get(path.as_posix())
         if expected is None or len(path.read_bytes()) != expected[0] or sha256(path) != expected[1]:
             print(f"ERROR: {path.name} does not match package {version}.", file=sys.stderr)
             raise SystemExit(2)
@@ -300,7 +198,38 @@ def verify_acf(path: Path, contract: dict[str, object]) -> None:
             actual = None
         if actual is None or not math.isclose(actual, float(expected), rel_tol=1e-9, abs_tol=1e-6):
             acf_contract_error(path, version, key, serialized, expected)
-    print(f"Verified {version}: {path} (unrelated ACF changes allowed)")
+    # Sanity validation only: changing valid masses/arms does not require a
+    # new patch. Runtime reads the loaded values, never these file numbers.
+    def number(key: str, *, positive: bool = False) -> float:
+        serialized = fields.get(key)
+        try:
+            value = float(serialized) if serialized is not None else math.nan
+        except ValueError:
+            value = math.nan
+        if not math.isfinite(value) or (positive and value <= 0):
+            acf_contract_error(path, version, key, serialized, "finite positive" if positive else "finite")
+        return value
+
+    empty = number("acf/_m_empty", positive=True)
+    maximum = number("acf/_m_max", positive=True)
+    number("acf/_m_fuel_max_tot", positive=True)
+    number("acf/_average_mac_acf", positive=True)
+    number("acf/_cgZ")
+    fwd, aft = number("acf/_cgZ_fwd"), number("acf/_cgZ_aft")
+    if maximum <= empty:
+        acf_contract_error(path, version, "acf/_m_max", fields.get("acf/_m_max"), "greater than empty mass")
+    if fwd >= aft:
+        acf_contract_error(path, version, "acf/_cgZ_aft", fields.get("acf/_cgZ_aft"), "aft of forward limit")
+    for index in range(9):
+        number(f"acf/_fixed_ref/{index},2")
+        number(f"acf/_fixed_max/{index}", positive=True)
+    ratios = [number(f"acf/_tank_rat/{i}", positive=True) for i in range(3)]
+    if abs(sum(ratios) - 1) > 0.000001 or abs(ratios[0] - ratios[2]) > 0.00000001:
+        acf_contract_error(path, version, "acf/_tank_rat", str(ratios), "symmetric wing capacities; sum 1")
+    for index in range(3):
+        number(f"acf/_tank_xyz/{index},2")
+        number(f"acf/_tank_xyz_full/{index},2")
+    print(f"Verified {version}: {path} (valid numeric W&B changes allowed)")
 
 
 def matches(lines: list[str], needle: str) -> list[int]:

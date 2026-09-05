@@ -1,17 +1,21 @@
 # Installation guide
 
+Version **0.5.0**. Automated regression and packaged-installation checks pass;
+in-simulator acceptance remains pending. See `VALIDATION_0.5.0.md`.
+
 ## Requirements
 
 - LevelUp 737NG Series using upstream Zibo 4.05.35 Tablet Lua and the
   unmodified upstream `zibomod.xpl`.
-- `737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` matching
-  `levelup600-wb-v2`, `levelup700-wb-v1`, `levelup800-wb-v2`, `levelup900-wb-v2` and
-  `levelup900er-wb-v2`. Unrelated flight-model changes are allowed.
+- All five LevelUp ACFs with the supported nine-station layout and valid
+  numeric geometry; three fuel tanks with equal wing capacities.
+  Pilot mass remains in empty mass, cabin crew/catering remain separate.
+  See `DYNAMIC_AIRCRAFT_DATA.md`.
 - Python 3. No compiler or plugin build is required.
 
 The reference ACF SHA-256 values are recorded in `SOURCE.md`. They establish
-provenance only; installation is controlled by the individual consumed W&B
-fields, not the whole-file hash. The role category is intentionally excluded
+provenance only; installation is controlled by the station/tank structure and numeric
+sanity, not exact arms/masses or the whole-file hash. The role category is intentionally excluded
 from the gate so that the current -900ER ACF and Jochen's announced correction
 of its Galley F/A roles are both accepted.
 
@@ -21,7 +25,7 @@ of its Galley F/A roles are both accepted.
 2. Back up the LevelUp test aircraft.
 3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
 4. Extract every file from
-   `LevelUp-737NG-Weight-Balance-v0.4.2.zip` directly into that folder. Do not
+   `LevelUp-737NG-Weight-Balance-v0.5.0.zip` directly into that folder. Do not
    create another subfolder.
 5. Run one of:
 
@@ -33,7 +37,7 @@ of its Galley F/A roles are both accepted.
 
 The installer must report:
 
-- package payload `v0.4.2` verified;
+- package payload `v0.5.0` verified;
 - all five ACF contracts verified;
 - Lua syntax passed when a Lua 5.1-compatible `luac` is available, or skipped
   with an informational message for incompatible system compilers;
@@ -52,7 +56,7 @@ from the -700-only v0.1.x package keeps
 marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
 required after installing or upgrading.
 
-For an existing v0.2.0 through v0.4.1 installation, extract v0.4.2 over
+For an existing v0.2.0 through v0.4.2 installation, extract v0.5.0 over
 the same Tablet folder and run the installer normally. Do not uninstall first.
 The five common Tablet hooks are unchanged. The installer adds two marked
 blocks to the sibling `B738.a_fms/B738.a_fms.lua` and verifies all five current
@@ -67,9 +71,12 @@ semantics. Patch anchors and ACF contracts are still validated normally.
 
 The installer tolerates other marked compatibility patches and both LF and
 CRLF line endings. It refuses an unsupported stock Tablet structure or a
-changed W&B field rather than guessing a source edit.
+malformed W&B layout/value rather than guessing a source edit.
 
 ## Capacity boundary
+
+The figures below describe historical author ACFs; in 0.5.0 the loaded
+DataRef maxima determine actual boundaries, including after author updates.
 
 The ACF station maxima are authoritative. Rounded stock Tablet cargo values
 are normalized to the exact active ACF maximum before any station or CG write:

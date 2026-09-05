@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import importlib.util
 import shutil
 import subprocess
@@ -11,6 +12,8 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
+# Independent frozen author inputs; the new installer has no numeric geometry.
+FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
     "B738X_XP12_4_05_35/plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
@@ -24,6 +27,7 @@ V020_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.0.zip
 V021_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.1.zip"
 V022_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.2.zip"
 FILES = (
+    "contracts/levelup-ng-wb-acf-v0.5.0.json",
     "B738.tablet_levelup_ng_wb_data.lua",
     "B738.tablet_levelup_ng_wb_core.lua",
     "B738.tablet_levelup_ng_wb_adapter.lua",
@@ -49,7 +53,8 @@ def digest(path: Path) -> str:
 
 
 def write_contract_acf(path: Path, contract: dict[str, object]) -> None:
-    fields = {**dict(contract["text"]), **dict(contract["number"])}
+    fixture = next(row for row in FIXTURES if row["name"] == contract["name"])
+    fields = {**fixture["text"], **fixture["number"], **dict(contract["text"]), **dict(contract["number"])}
     roles = (1, 1, 0, 0, 0, 0, 0, 1, 1)
     for index, role in enumerate(roles):
         fields[f"acf/_fixed_role/{index}"] = role
@@ -99,6 +104,7 @@ def setup(
     folder = aircraft / "plugins/xlua/scripts/B738.tablet"
     folder.mkdir(parents=True)
     for name in FILES:
+        (folder / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(PACKAGE / name, folder / name)
     for contract in installer.ACF_CONTRACTS:
         write_contract_acf(aircraft / str(contract["name"]), contract)
@@ -244,13 +250,11 @@ def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool 
         fms_original = fms_target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.4.2" in first.stdout
-        assert "Verified package payload: v0.4.2" in first.stdout
-        assert "Verified levelup600-wb-v2" in first.stdout
-        assert "Verified levelup700-wb-v1" in first.stdout
-        assert "Verified levelup800-wb-v2" in first.stdout
-        assert "Verified levelup900-wb-v2" in first.stdout
-        assert "Verified levelup900er-wb-v2" in first.stdout
+        assert "Installed v0.5.0" in first.stdout
+        assert "Verified package payload: v0.5.0" in first.stdout
+        assert first.stdout.count("Verified levelup-ng-wb-layout-v1:") == 5
+        for contract in installer.ACF_CONTRACTS:
+            assert contract["name"] in first.stdout
         installed = target.read_bytes()
         fms_installed = fms_target.read_bytes()
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == original
@@ -312,8 +316,8 @@ def exercise_non_wb_acf_change() -> None:
         with acf.open("ab") as stream:
             stream.write(b"# unrelated FM tuning remains allowed\n")
         result = run(folder)
-        assert "Verified levelup700-wb-v1" in result.stdout
-        assert "Verified levelup800-wb-v2" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
     finally:
         temporary.cleanup()
 
@@ -325,7 +329,7 @@ def exercise_station_role_tolerance() -> None:
         replace_acf_field(acf, "acf/_fixed_role/7", "0")
         replace_acf_field(acf, "acf/_fixed_role/8", "0")
         result = run(folder)
-        assert "Verified levelup900er-wb-v2" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
     finally:
         temporary.cleanup()
 
@@ -337,10 +341,10 @@ def exercise_wrong_acf(name: str, version: str) -> None:
         fms_target = folder.parent / "B738.a_fms/B738.a_fms.lua"
         original_hash = digest(target)
         fms_original_hash = digest(fms_target)
-        replace_acf_field(folder.parents[3] / name, "acf/_fixed_ref/4,2", "47.000000000")
+        replace_acf_field(folder.parents[3] / name, "acf/_fixed_name/4", "Cargo1")
         result = run(folder, expected=2)
         assert f"violates {version}" in result.stderr
-        assert "acf/_fixed_ref/4,2" in result.stderr
+        assert "acf/_fixed_name/4" in result.stderr
         assert digest(target) == original_hash
         assert digest(fms_target) == fms_original_hash
         assert not (folder / "B738.tablet.lua.levelupngwb.backup").exists()
@@ -397,7 +401,7 @@ def exercise_v014_upgrade() -> None:
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
         result = run(folder)
-        assert "Installed v0.4.2" in result.stdout
+        assert "Installed v0.5.0" in result.stdout
         upgraded = target.read_text(encoding="utf-8")
         assert "LEVELUP_700_WB" not in upgraded
         assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
@@ -430,7 +434,7 @@ def exercise_v020_upgrade() -> None:
             "acf/_tank_xyz_full/2,2": "63.950000763",
         }
         new_arms = dict(next(
-            contract for contract in installer.ACF_CONTRACTS
+            contract for contract in FIXTURES
             if contract["name"] == "737_80NG.acf"
         )["number"])
         acf = folder.parents[3] / "737_80NG.acf"
@@ -448,12 +452,13 @@ def exercise_v020_upgrade() -> None:
         for key in old_arms:
             replace_acf_field(acf, key, str(new_arms[key]))
         for name in FILES:
+            (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.2" in result.stdout
-        assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.2" in result.stdout
+        assert "Verified package payload: v0.5.0" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Installed v0.5.0" in result.stdout
         assert target.read_bytes() == installed_v020
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v020
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -512,13 +517,14 @@ def exercise_v021_upgrade() -> None:
         backup_v021 = (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes()
 
         for name in FILES:
+            (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.2" in result.stdout
-        assert "Verified levelup700-wb-v1" in result.stdout
-        assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.2" in result.stdout
+        assert "Verified package payload: v0.5.0" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Installed v0.5.0" in result.stdout
         assert target.read_bytes() == installed_v021
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v021
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -542,13 +548,14 @@ def exercise_v022_upgrade() -> None:
         backup_v022 = (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes()
 
         for name in FILES:
+            (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.4.2" in result.stdout
-        assert "Verified levelup700-wb-v1" in result.stdout
-        assert "Verified levelup800-wb-v2" in result.stdout
-        assert "Installed v0.4.2" in result.stdout
+        assert "Verified package payload: v0.5.0" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
+        assert "Installed v0.5.0" in result.stdout
         assert target.read_bytes() == installed_v022
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v022
         fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
@@ -581,7 +588,7 @@ def exercise_fms_zfw_formula_oracle() -> None:
     station_masses = (500.0, 750.0, 820.0, 910.0, 1000.0, 1080.0, 1170.0, 125.0, 140.0)
     physical_payload = sum(station_masses)
     stale_aggregate = physical_payload + 321.0
-    for contract in installer.ACF_CONTRACTS:
+    for contract in FIXTURES:
         empty_kg = float(dict(contract["number"])["acf/_m_empty"]) / 2.2046226218487757
         expected = empty_kg + physical_payload
         production_equivalent = empty_kg + sum(max(mass, 0.0) for mass in station_masses)
@@ -608,8 +615,8 @@ exercise_descent_tables_installed_second()
 exercise_fms_zfw_formula_oracle()
 exercise_non_wb_acf_change()
 exercise_station_role_tolerance()
-exercise_wrong_acf("737_70NG.acf", "levelup700-wb-v1")
-exercise_wrong_acf("737_80NG.acf", "levelup800-wb-v2")
-exercise_wrong_acf("737_90NG.acf", "levelup900-wb-v2")
-exercise_wrong_acf("737_9ENG.acf", "levelup900er-wb-v2")
+exercise_wrong_acf("737_70NG.acf", "levelup-ng-wb-layout-v1")
+exercise_wrong_acf("737_80NG.acf", "levelup-ng-wb-layout-v1")
+exercise_wrong_acf("737_90NG.acf", "levelup-ng-wb-layout-v1")
+exercise_wrong_acf("737_9ENG.acf", "levelup-ng-wb-layout-v1")
 print("PASS: Lua 5.1 compiler selection, Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy migration, five ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")

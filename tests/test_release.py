@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
+import json
 import importlib.util
 import shutil
 import subprocess
@@ -11,7 +13,13 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.4.2.zip"
+parser = argparse.ArgumentParser()
+parser.add_argument("--aircraft-root", type=Path)
+parser.add_argument("--lua51-syntax", action="store_true")
+args = parser.parse_args()
+# Independent frozen author inputs; the new installer has no numeric geometry.
+FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.0.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -39,6 +47,9 @@ EXPECTED = {
     "SOURCE.md",
     "OWNER_CLOSURE.md",
     "RUNTIME_TEST_PLAN.md",
+    "DYNAMIC_AIRCRAFT_DATA.md",
+    "VALIDATION_0.5.0.md",
+    "RELEASE_NOTES_0.5.0.md",
     "ACF_RECONCILE_2026_08_22.md",
     "ACF_RECONCILE_2026_08_23.md",
     "ACF_RECONCILE_2026_08_25.md",
@@ -48,7 +59,7 @@ EXPECTED = {
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.4.1.json",
+    "contracts/levelup-ng-wb-acf-v0.5.0.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -59,7 +70,8 @@ spec.loader.exec_module(installer)
 
 
 def write_contract_acf(path: Path, contract: dict[str, object]) -> None:
-    fields = {**dict(contract["text"]), **dict(contract["number"])}
+    fixture = next(row for row in FIXTURES if row["name"] == contract["name"])
+    fields = {**fixture["text"], **fixture["number"], **dict(contract["text"]), **dict(contract["number"])}
     roles = (1, 1, 0, 0, 0, 0, 0, 1, 1)
     for index, role in enumerate(roles):
         fields[f"acf/_fixed_role/{index}"] = role
@@ -90,22 +102,29 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         shutil.copy2(BASELINE, tablet / "B738.tablet.lua")
         shutil.copy2(FMS_BASELINE, fms / "B738.a_fms.lua")
         for contract in installer.ACF_CONTRACTS:
-            write_contract_acf(aircraft / str(contract["name"]), contract)
+            if args.aircraft_root:
+                shutil.copy2(args.aircraft_root / contract["name"], aircraft / contract["name"])
+            else:
+                write_contract_acf(aircraft / str(contract["name"]), contract)
         completed = subprocess.run(
             ["python3", "z_Install_LevelUp_NG_WB.py"], cwd=tablet,
             capture_output=True, text=True, check=False,
         )
         assert completed.returncode == 0, completed.stdout + completed.stderr
-        assert "Verified levelup600-wb-v2" in completed.stdout
-        assert "Verified levelup700-wb-v1" in completed.stdout
-        assert "Verified levelup800-wb-v2" in completed.stdout
-        assert "Verified levelup900-wb-v2" in completed.stdout
-        assert "Verified levelup900er-wb-v2" in completed.stdout
+        assert completed.stdout.count("Verified levelup-ng-wb-layout-v1:") == 5
+        for contract in installer.ACF_CONTRACTS:
+            assert contract["name"] in completed.stdout
         installed = (tablet / "B738.tablet.lua").read_bytes()
         assert installed.count(b"BEGIN LEVELUP_NG_WB") == 5
         assert b"BEGIN LEVELUP_700_WB" not in installed
         fms_installed = (fms / "B738.a_fms.lua").read_bytes()
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
         assert fms_installed.count(b"BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        if args.lua51_syntax:
+            from lupa.lua51 import LuaRuntime
+            for path in [tablet / "B738.tablet.lua", fms / "B738.a_fms.lua",
+                         *tablet.glob("B738.tablet_levelup_ng_wb_*.lua")]:
+                LuaRuntime().execute("assert(loadfile(...))", str(path))
+                print("PASS packaged Lua 5.1 syntax: " + path.name)
 
-print("PASS: v0.4.2 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")
+print("PASS: v0.5.0 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")

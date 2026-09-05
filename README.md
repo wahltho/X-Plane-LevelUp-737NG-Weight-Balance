@@ -1,9 +1,19 @@
 # LevelUp 737NG weight-and-balance compatibility patch
 
+## Version 0.5.0
+
+The patch now reads numeric W&B geometry from the loaded aircraft.
+Lua 5.1 regressions, all five current author ACFs, installer/coexistence,
+Toolkit contract and packaged installation checks pass. Simulator acceptance
+remains pending; see `VALIDATION_0.5.0.md`.
+See `DYNAMIC_AIRCRAFT_DATA.md` for the new owner contract and units.
+The historical release description and numeric table below document 0.4.2;
+those numbers are no longer production inputs or exact installation gates.
+
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
 `737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.4.2`
+unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.5.0`
 supports Variant-IDs `3/2/0/1/4` (`737-600/-700/-800/-900/-900ER`) from one package.
 Every MAX variant and stock Zibo delegate to the original Tablet
 functions.
@@ -46,7 +56,7 @@ semantics. No W&B hook or runtime behavior changed.
   payload. The current X-Plane station values are the prediction input.
 - Current/in-flight CG: X-Plane's `cg_offset_z_mac` is the sole owner and EFB
   source.
-- ZFW/TOW/LW CG: the common mass-and-moment core uses the active ACF contract,
+- OEW/ZFW/TOW/LW CG: the common mass-and-moment core uses one loaded-aircraft snapshot,
   calibrates its coordinate system from X-Plane's current ZFW offset, and uses
   the same derived LEMAC for predictions and fixed limits.
 - EFB/FMC: existing Tablet DataRefs consume the replacement calculations;
@@ -59,9 +69,8 @@ semantics. No W&B hook or runtime behavior changed.
 
 ## ACF contracts
 
-The installer verifies only the W&B fields consumed by the integration. It
-accepts unrelated flight-model tuning and does not require a whole-file
-checksum.
+The 0.5.0 installer verifies layout and numeric sanity, not exact arms/masses
+or whole-file checksums. The following table records the historical inputs:
 
 | Variant | ID | ACF contract | Empty / max mass | MAC |
 |---|---:|---|---:|---:|
@@ -85,8 +94,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.4.2.zip`
-- `LevelUp-737NG-Weight-Balance-v0.4.2.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.5.0.zip`
+- `LevelUp-737NG-Weight-Balance-v0.5.0.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:
@@ -117,6 +126,7 @@ end-user archive. In this source directory run:
 luac -p B738.tablet_levelup_ng_wb_*.lua
 lua tests/test_core.lua
 lua tests/test_adapter.lua
+lua tests/test_data.lua
 python3 tests/test_acf_contract.py
 python3 tests/test_overlay_reconcile.py
 python3 tests/test_installer.py
@@ -124,6 +134,9 @@ python3 tests/test_release.py
 python3 tests/test_toolkit_contract.py
 ```
 
+Use a Lua 5.1-compatible interpreter/compiler. Run only with explicit test
+approval; results for 0.5.0 are recorded in `VALIDATION_0.5.0.md`. The historical private
+overlay audit is separate from public dynamic-data acceptance.
 No plugin build or modified binary is involved.
 
 ## Maintenance Toolkit contract
@@ -137,7 +150,7 @@ The source handoff is machine-readable:
 
 - `patches/B738.tablet.lua.json` contains the five structural Tablet changes;
 - `patches/B738.a_fms.lua.json` contains the two structural FMS changes;
-- `contracts/levelup-ng-wb-acf-v0.4.1.json` contains the semantic ACF fields
+- `contracts/levelup-ng-wb-acf-v0.5.0.json` contains the structural ACF fields
   required by the five supported variants;
 - `toolkit/weight-and-balance-module.json` binds payload hashes, target paths,
   variant IDs and the intended schema-3 operations.

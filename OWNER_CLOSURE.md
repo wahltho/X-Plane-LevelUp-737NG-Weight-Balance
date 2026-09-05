@@ -1,8 +1,12 @@
 # Owner and closure matrix
 
+See `DYNAMIC_AIRCRAFT_DATA.md` for the 0.5.0 source contract and
+`VALIDATION_0.5.0.md` for its passing dry/package tests. The historical runtime
+observations below do not establish new 0.5.0 simulator acceptance.
+
 | Chain element | Owner for IDs 3/2/0/1/4 | Input / unit | Consumer | Dry evidence | Runtime status |
 |---|---|---|---|---|---|
-| Aircraft reference | active versioned ACF contract | lb, ft -> kg, m | data table | five semantic gates and reconciled overlay fields | not run |
+| Aircraft reference | loaded DataRefs plus per-load ACF metadata | kg, ft, m | shared frame snapshot | dynamic and five current ACF cases pass | not run |
 | Variant selection | `zibomod/b737_variant` | ID 3, 2, 0, 1 or 4 | contract selector | five-way switch/delegation harness | not run |
 | EFB payload selection | stock Tablet zones/cargo/crew | pax counts, kg | target builder | mapping test | -700 only observed |
 | Internal station state | common adapter | nine targets, kg | `m_stations[0..8]` | independent rate/owner tests for all five | -700 v0.1.3 positive |
@@ -22,7 +26,7 @@
 | FMC CG | upstream FMC | `calc_to_cg`, %MAC | TAKEOFF REF / `fmc_cg` | producer handoff | pending |
 | Takeoff trim | upstream table | FMC CG, flaps | trim display | unchanged consumer | pending |
 | Save/load/SimBrief | stock Tablet | zone/cargo state | regenerated targets | owner design | pending |
-| Aircraft reload/change | common adapter | variant ID | cache invalidation/delegation | 2 -> 0 -> unsupported harness | pending |
+| Aircraft reload/change | common adapter | flight_start, path, variant | metadata/datum invalidation | same-ID/MAC reload cases pass | pending |
 | Installer lifecycle | common installer | stock .35 + five ACF contracts | five Tablet + two FMS blocks | LF/CRLF, idempotence, uninstall | not runtime |
 | v0.1.4-v0.3.1 migration | common installer | legacy/current blocks and backups | v0.3.2 contract | migration/idempotence harness | not runtime |
 | Patch coexistence | independent marked blocks | stock Tablet/FMS | performance and VNAV patches retained | both install orders represented | pending runtime |

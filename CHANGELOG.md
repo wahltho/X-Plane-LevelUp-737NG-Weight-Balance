@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 - 2026-09-05
+
+- Replaces fixed numeric variant tables with loaded-aircraft DataRef snapshots.
+  MAC, CG limits and station/tank names are read from the current ACF per load.
+- Uses one frame's geometry and pre-write datum for OEW/ZFW/TOW/LW, graph
+  checks and the existing FMC CG handoff. Resets on aircraft load/path/variant.
+- Inhibits writes/predictions for invalid supported inputs without returning
+  payload ownership to stock scalar writers. External stations stay read-only.
+- Replaces exact numeric ACF gates with layout and numeric sanity checks.
+- Retains the existing dofile/install positions, Tablet/FMS marked hooks,
+  payload/fuel policies and trim tables. No aircraft or private-port changes.
+- Lua 5.1, math/adapter/dynamic-input regressions, five current author ACFs,
+  installer/migration/coexistence, Toolkit and packaged-installation checks pass.
+  No new simulator-runtime validation; see `VALIDATION_0.5.0.md`.
+
 ## 0.4.2 - 2026-08-30
 
 - Restricts the optional whole-file Lua syntax check to a Lua 5.1-compatible

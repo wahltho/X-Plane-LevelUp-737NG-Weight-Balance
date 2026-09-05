@@ -8,17 +8,80 @@ local M = {}
 local original = {}
 local warned_station = nil
 local cached_lemac_z_m = nil
-local cached_variant_id = nil
+local aircraft_key, metadata, frame_data, geometry_error = nil, nil, nil, nil
+local warned_geometry = nil
 simDR_levelup_ng_zfw_cg_offset_z = find_dataref("sim/flightmodel2/misc/zfw_cg_offset_z")
+-- XLua scalar properties must be module-global, not local wrapper objects.
+simDR_levelup_ng_acf_path = find_dataref("sim/aircraft/view/acf_relative_path")
+simDR_levelup_ng_empty = find_dataref("sim/aircraft/weight/acf_m_empty")
+simDR_levelup_ng_max = find_dataref("sim/aircraft/weight/acf_m_max")
+simDR_levelup_ng_reference = find_dataref("sim/aircraft/weight/acf_cgZ_original")
+simDR_levelup_ng_station_z = find_dataref("sim/aircraft/weight/acf_stations_ref_z")
+simDR_levelup_ng_station_max = find_dataref("sim/aircraft/weight/acf_m_station_max")
+simDR_levelup_ng_fuel_max = find_dataref("sim/aircraft/weight/acf_m_fuel_tot")
+simDR_levelup_ng_tank_empty = find_dataref("sim/aircraft/overflow/acf_tank_Z")
+simDR_levelup_ng_tank_full = find_dataref("sim/aircraft/overflow/acf_tank_Z_full")
+simDR_levelup_ng_tank_rat = find_dataref("sim/aircraft/overflow/acf_tank_rat")
+
+function M.reset_aircraft()
+    -- Retire our last handoff on a supported -> unsupported transition too;
+    -- do not clear a continuously stock-owned aircraft's publication.
+    if aircraft_key ~= nil or contracts[B738DR_b737_variant] then B738DR_calc_to_cg = 0 end
+    aircraft_key, metadata, frame_data, geometry_error = nil, nil, nil, nil
+    cached_lemac_z_m, warned_station, warned_geometry = nil, nil, nil
+end
+
+local function read_aircraft(refresh)
+    local policy = contracts[B738DR_b737_variant]
+    if not policy then M.reset_aircraft(); return nil end
+    local loaded = (simDR_levelup_ng_acf_path or ""):gsub("%z.*", ""):gsub("\\", "/")
+    local root = (file_path or ""):gsub("%z.*", ""):gsub("\\", "/")
+    local key = tostring(B738DR_b737_variant) .. "|" .. root .. "|" .. loaded
+    if aircraft_key ~= key then
+        M.reset_aircraft()
+        aircraft_key = key
+        if loaded:match("([^/]+)$") ~= policy.acf_name or root == "" then
+            geometry_error = "loaded ACF path/variant mismatch"
+        else
+            local ok, result, reason = pcall(contracts.read_metadata,
+                root:gsub("/+$", "") .. "/" .. policy.acf_name, policy)
+            if ok then metadata, geometry_error = result, reason
+            else geometry_error = "ACF metadata read failed: " .. tostring(result) end
+        end
+        refresh = true
+    end
+    if refresh then
+        cached_lemac_z_m = nil
+        frame_data = nil
+        if metadata then
+            local ok, result, reason = pcall(function()
+                return contracts.snapshot(policy, metadata, {
+                    empty_kg = simDR_levelup_ng_empty, max_kg = simDR_levelup_ng_max,
+                    reference_ft = simDR_levelup_ng_reference, fuel_kg = simDR_levelup_ng_fuel_max,
+                    station_z = simDR_levelup_ng_station_z, station_max = simDR_levelup_ng_station_max,
+                    tank_empty = simDR_levelup_ng_tank_empty, tank_full = simDR_levelup_ng_tank_full,
+                    tank_rat = simDR_levelup_ng_tank_rat,
+                })
+            end)
+            if ok then frame_data, geometry_error = result, reason
+            else geometry_error = "aircraft DataRefs unavailable: " .. tostring(result) end
+        end
+    end
+    if not frame_data then
+        B738DR_calc_to_cg = 0
+        if warned_geometry ~= geometry_error then
+            print("LevelUp W&B: " .. tostring(geometry_error) ..
+                "; station writes/predicted CG inhibited (reload after correcting ACF metadata)")
+            warned_geometry = geometry_error
+        end
+    else
+        warned_geometry = nil
+    end
+    return frame_data
+end
 
 local function active_data()
-    local variant_id = B738DR_b737_variant
-    if cached_variant_id ~= variant_id then
-        cached_variant_id = variant_id
-        cached_lemac_z_m = nil
-        warned_station = nil
-    end
-    return contracts[variant_id]
+    return read_aircraft(false)
 end
 
 local function current_stations()
@@ -74,10 +137,14 @@ local function refresh_reference_lemac(data)
 end
 
 local function reference_lemac(data)
-    return cached_lemac_z_m or refresh_reference_lemac(data)
+    -- Never recalibrate after writing stations against a pre-write XP offset.
+    return cached_lemac_z_m
 end
 
 local function mac_for(data, stations, fuel)
+    if B738DR_ext_payload == 0 and not core.validate_station_masses(stations, data.stations) then
+        return 0
+    end
     local cg_z = core.cg_z(
         data.empty_mass_kg, data.empty_cg_z_m, stations, data.stations, fuel, data.tanks
     )
@@ -128,20 +195,24 @@ local function validate_or_warn(data, stations)
 end
 
 function M.owns_payload()
-    return active_data() ~= nil
+    -- An invalid supported aircraft must NOT fall back to stock scalar writers.
+    return contracts[B738DR_b737_variant] ~= nil
 end
 
 function M.data_for_variant(variant_id)
-    return contracts[variant_id]
+    if variant_id == B738DR_b737_variant then return active_data() end
+    return nil
 end
 
-function M.frame_update()
+function M.begin_frame()
+    local data = read_aircraft(true)
+    if data then refresh_reference_lemac(data) end
+end
+
+function M.frame_update(prepared)
+    if not prepared then M.begin_frame() end
     local data = active_data()
     if not data then return end
-
-    -- Calibrate before station writes so X-Plane's ZFW offset and the station
-    -- snapshot describe the same completed physics frame.
-    refresh_reference_lemac(data)
 
     local stations = prediction_stations()
     refresh_weight_contract(data, stations)
@@ -172,15 +243,17 @@ end
 
 function M.update_payload()
     local data = active_data()
-    if not data then return original.update_payload() end
-    local targets = selected_stations()
+    if not M.owns_payload() then return original.update_payload() end
+    if not data then return end
+    local targets = prediction_stations()
     refresh_weight_contract(data, targets)
     validate_or_warn(data, targets)
 end
 
 function M.total_payload_entry(in_entry)
     local data = active_data()
-    if not data then return original.total_payload_entry(in_entry) end
+    if not M.owns_payload() then return original.total_payload_entry(in_entry) end
+    if not data or B738DR_ext_payload ~= 0 then return end
     original.total_payload_entry(in_entry)
     local targets = selected_stations()
     refresh_weight_contract(data, targets)
@@ -189,11 +262,12 @@ end
 
 function M.calc_mac(in_gw_tow)
     local data = active_data()
-    if not data then return original.calc_mac(in_gw_tow) end
+    if not M.owns_payload() then return original.calc_mac(in_gw_tow) end
     if in_gw_tow == 0 then
         local mac = simDR_cg_z_mac or 0
         return mac, core.clamp(mac, 0, 100)
     end
+    if not data then return 0, 0 end
     local fuel
     if B738DR_req_fuel and B738DR_req_fuel > 0 then
         fuel = core.fuel_from_total(B738DR_req_fuel, data.tanks)
@@ -207,13 +281,15 @@ end
 
 function M.calc_zfw_mac()
     local data = active_data()
-    if not data then return original.calc_zfw_mac() end
+    if not M.owns_payload() then return original.calc_zfw_mac() end
+    if not data then return 0 end
     return mac_for(data, prediction_stations(), nil)
 end
 
 function M.calc_oew_mac()
     local data = active_data()
-    if not data then return original.calc_oew_mac() end
+    if not M.owns_payload() then return original.calc_oew_mac() end
+    if not data then return 0 end
     local source = prediction_stations()
     local service_only = { 0, 0, 0, 0, 0, 0, 0, source[8], source[9] }
     return mac_for(data, service_only, nil)
@@ -221,20 +297,22 @@ end
 
 function M.calc_des_mac(fuel_input)
     local data = active_data()
-    if not data then return original.calc_des_mac(fuel_input) end
+    if not M.owns_payload() then return original.calc_des_mac(fuel_input) end
+    if not data then return 0 end
     local fuel = core.fuel_from_total(fuel_input or 0, data.tanks)
     return mac_for(data, prediction_stations(), fuel)
 end
 
 function M.calc_gw_cg_shift()
-    if not active_data() then return original.calc_gw_cg_shift() end
+    if not M.owns_payload() then return original.calc_gw_cg_shift() end
     local mac = simDR_cg_z_mac or 0
     return mac, core.clamp(mac, 0, 100)
 end
 
 local function fixed_check(original_function, weight_kg, mac)
     local data = active_data()
-    if not data then return original_function(weight_kg, mac) end
+    if not M.owns_payload() then return original_function(weight_kg, mac) end
+    if not data then return false end
     local lemac_z_m = reference_lemac(data)
     if not lemac_z_m then return false end
     return core.within_fixed_envelope(weight_kg, mac, data, lemac_z_m)
@@ -258,6 +336,7 @@ function M.install()
     original.check_zfw = check_zfw
     original.check_lw = check_lw
     original.after_physics = after_physics
+    original.flight_start = flight_start
     original.change_payload_command = B738CMD_change_payload
 
     update_payload = M.update_payload
@@ -273,12 +352,18 @@ function M.install()
     check_lw = M.check_lw
     B738CMD_change_payload = {
         once = function()
-            if not active_data() then original.change_payload_command:once() end
+            if not M.owns_payload() then original.change_payload_command:once() end
         end,
     }
     after_physics = function()
+        -- Read/calibrate before stock graph consumers AND before our writes.
+        M.begin_frame()
         original.after_physics()
-        M.frame_update()
+        M.frame_update(true)
+    end
+    flight_start = function()
+        M.reset_aircraft()
+        if original.flight_start then original.flight_start() end
     end
 end
 

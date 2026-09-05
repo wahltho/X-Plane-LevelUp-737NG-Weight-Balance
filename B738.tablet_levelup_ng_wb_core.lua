@@ -77,6 +77,16 @@ function M.tank_arm(tank, mass_kg)
 end
 
 function M.cg_z(empty_mass_kg, empty_cg_z_m, station_masses, stations, fuel_masses, tanks)
+    if not finite(empty_mass_kg) or empty_mass_kg <= 0 or not finite(empty_cg_z_m) then return nil end
+    for index = 1, 9 do
+        if not finite(station_masses[index]) or station_masses[index] < 0 or
+            not stations[index] or not finite(stations[index].arm_m) then return nil end
+    end
+    if fuel_masses then
+        for index = 1, 3 do
+            if not finite(fuel_masses[index]) or fuel_masses[index] < 0 then return nil end
+        end
+    end
     local mass = empty_mass_kg
     local moment = empty_mass_kg * empty_cg_z_m
     for index = 1, #stations do

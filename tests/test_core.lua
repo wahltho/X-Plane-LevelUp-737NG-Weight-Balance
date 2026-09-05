@@ -1,6 +1,6 @@
 local package_root = arg[0]:match("^(.*)/tests/") or "."
 local core = dofile(package_root .. "/B738.tablet_levelup_ng_wb_core.lua")
-local contracts = dofile(package_root .. "/B738.tablet_levelup_ng_wb_data.lua")
+local contracts = dofile(package_root .. "/tests/fixtures/wb_v041.lua")
 
 local function near(actual, expected, tolerance, label)
     assert(math.abs(actual - expected) <= tolerance,

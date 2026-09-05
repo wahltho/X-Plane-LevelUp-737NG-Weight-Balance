@@ -5,6 +5,14 @@ baseline aircraft and Lua files.
 
 ## Instrumentation
 
+For 0.5.0 also record runtime empty/max mass, reference CG, station arms/maxima,
+fuel capacities/ratios/empty/full offsets, loaded ACF path and its MAC/limits.
+In a disposable aircraft copy, change one numeric family at a time and reload
+the same variant: verify the new geometry is used without a package update.
+Exercise invalid geometry, name/order mismatch and missing arrays: no station
+writes or FMC predicted-CG publication; correct and reload to verify recovery.
+Do not modify the release aircraft or use unapproved FM inputs for these tests.
+
 Capture for every case:
 
 - Variant-ID and aircraft filename;
@@ -19,8 +27,8 @@ Capture for every case:
 Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all five ACF contracts pass the v0.4.1 installer. A whole-file hash may
-   differ after unrelated flight-model tuning.
+1. Confirm all five layouts pass the v0.5.0 installer. Record loaded numeric
+   DataRefs and ACF metadata; the previous exact numeric gates no longer apply.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
    rows must not show `CHECK`.

@@ -1,127 +1,56 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
-import hashlib
+"""Layout gate plus numeric changes, independently frozen author fixtures."""
+import contextlib
 import importlib.util
-import math
-import os
-import re
+import io
+import json
+import tempfile
 from pathlib import Path
 
-
-PACKAGE = Path(__file__).resolve().parents[1]
-REPO = Path(os.environ.get("ZIBO_MOD_REPOSITORY", "/Users/wahltho/Documents/Projects/Zibo Mod"))
-OVERLAY = REPO / "overlay/LU 737NG Series"
-DATA = PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
-INSTALLER = PACKAGE / "z_Install_LevelUp_NG_WB.py"
-
-EXPECTED = {
-    "737_60NG.acf": {
-        "variant": 3, "version": "levelup600-wb-v2",
-        "reference_hash": "c808d3536fd938bb76c51e0acf7256bd65bed2a7380eabbec496ccde90a518d4",
-        "overlay_hash": "02e39a193298f86828d74c9752ae3cf768ebb940c36d462540dff71b05ccf861",
-        "mass": (80199.78, 45.979999542, 44.229999542, 47.700000763, 14.878139496, 124499.8, 46062.01),
-        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        "arms": (24, 62, 20, 32, 46, 58, 70, 15, 76.199996948),
-        "maxima": (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
-        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
-        "tank_empty": (49, 43, 49), "tank_full": (49, 43, 49),
-    },
-    "737_70NG.acf": {
-        "variant": 2, "version": "levelup700-wb-v1",
-        "reference_hash": "8cb0d7254e63cd1a2b4fe88071e706393504e6bfce7ab6af3cca417d22ea3c31",
-        "overlay_hash": "c106a1b17bb9c4c9210e2e89c0aa8f3faec2bd687fd4794a3232d465766380f8",
-        "mass": (82999.61, 49.029998779, 47.189998627, 50.939998627, 14.992128372, 154499.9, 46062.008),
-        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley R"),
-        "arms": (29, 69, 22, 34, 46, 58, 70, 15, 80),
-        "maxima": (4200, 6900, 8000, 8000, 8000, 8000, 8000, 3000, 3000),
-        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
-        "tank_empty": (52.650001526, 46, 52.650001526), "tank_full": (52.650001526, 46, 52.650001526),
-    },
-    "737_80NG.acf": {
-        "variant": 0, "version": "levelup800-wb-v2",
-        "reference_hash": "9315f4110ae8c2b5feb53872ae3d7a6bcc2ff380099b6c925c9734d2d65fbe16",
-        "overlay_hash": "1b60040ee59117dac335c79631f77e27be71d60e08ea7b25c95ccf84e1e7b6e1",
-        "mass": (91514.04, 59.889999390, 57.869998932, 61.840000153, 14.992127419, 174700.0, 46062.01),
-        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        "arms": (37, 85, 33.5, 46.5, 58.5, 70.5, 82.5, 15, 99),
-        "maxima": (7848, 10690, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
-        "tank_empty": (64, 56.5, 64), "tank_full": (64, 56.5, 64),
-    },
-    "737_90NG.acf": {
-        "variant": 1, "version": "levelup900-wb-v2",
-        "reference_hash": "4b4ec0617e7aa1786be362e9cfe1ab60d92ba1b097e8145e896d31f835f842e9",
-        "overlay_hash": "f361f03748ca6047850e8424edd819bc524de4ab2eebbebbe1da352965bafe0a",
-        "mass": (94580, 64.650001526, 63.380001068, 67.129997253, 14.993530273, 174700, 46062.008),
-        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        "arms": (45, 89, 34, 47.5, 65, 77, 91, 15, 108),
-        "maxima": (7848, 10690, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
-        "tank_empty": (69, 62, 69), "tank_full": (69, 62, 69),
-    },
-    "737_9ENG.acf": {
-        "variant": 4, "version": "levelup900er-wb-v2",
-        "reference_hash": "c2c0db2907904fb50fbd281f96d46c90e1191f002ed360bcaed778ba106cfed2",
-        "overlay_hash": "72cfb578e02e5ebef65c7de9abe960d37f4e36431510ecbc7360d4bef2db1e80",
-        "mass": (98495, 65.389999390, 64.879997253, 67.879997253, 14.993530273, 187699.31, 52512.31),
-        "names": ("Cargo1", "Cargo2", "Zone 1", "Zone 2", "Zone 3", "Zone 4", "Zone 5", "Galley F", "Galley A"),
-        "arms": (45, 89, 34, 47.5, 65, 77, 91, 15, 108),
-        "maxima": (7848, 10500, 10000, 10000, 10000, 10000, 10000, 3000, 3000),
-        "roles": (1, 1, 0, 0, 0, 0, 0, 1, 1),
-        "tank_empty": (69, 62, 69), "tank_full": (69, 62, 69),
-    },
-}
-
-
-def values(path: Path) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("P acf/"):
-            key, value = line[2:].split(" ", 1)
-            assert key not in result, key
-            result[key] = value
-    return result
-
-
-spec = importlib.util.spec_from_file_location("levelup_ng_installer", INSTALLER)
-assert spec is not None and spec.loader is not None
+ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("wb_installer", ROOT / "z_Install_LevelUp_NG_WB.py")
 installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
-contracts = {str(contract["name"]): contract for contract in installer.ACF_CONTRACTS}
-assert set(contracts) == set(EXPECTED)
+fixtures = json.loads((ROOT / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
 
-ratios = (0.187000006, 0.625999987, 0.187000006, 0, 0, 0, 0, 0, 0)
-mass_keys = ("acf/_m_empty", "acf/_cgZ", "acf/_cgZ_fwd", "acf/_cgZ_aft", "acf/_average_mac_acf", "acf/_m_max", "acf/_m_fuel_max_tot")
-for name, expected in EXPECTED.items():
-    path = OVERLAY / name
-    assert hashlib.sha256(path.read_bytes()).hexdigest() == expected["overlay_hash"]
-    acf = values(path)
-    contract = contracts[name]
-    assert contract["version"] == expected["version"]
-    text = dict(contract["text"])
-    numbers = dict(contract["number"])
-    assert [numbers[key] for key in mass_keys] == list(expected["mass"])
-    for key, wanted in text.items():
-        assert acf[key] == wanted, (name, key)
-    for key, wanted in numbers.items():
-        assert math.isclose(float(acf[key]), float(wanted), rel_tol=1e-9, abs_tol=1e-6), (name, key)
-    for index in range(9):
-        assert int(float(acf[f"acf/_fixed_role/{index}"])) == expected["roles"][index]
-        assert f"acf/_fixed_role/{index}" not in numbers
-        assert numbers[f"acf/_tank_rat/{index}"] == ratios[index]
+def check(contract, fields, accepted):
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / contract["name"]
+        path.write_text("I\n1200 Version\n" + "".join(f"P {k} {v}\n" for k, v in fields.items()))
+        try:
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                installer.verify_acf(path, contract)
+        except SystemExit as error:
+            assert not accepted and error.code == 2
+        else:
+            assert accepted
 
-source = DATA.read_text(encoding="utf-8")
-for expected in EXPECTED.values():
-    assert expected["version"] in source
-    assert expected["reference_hash"] in source
-station_rows = re.findall(r'\{ name = "([^\"]+)",\s+arm_m = ([0-9.]+) \* FT_TO_M, max_kg = ([0-9.]+) \* LB_TO_KG \}', source)
-assert len(station_rows) == 45
-for offset, variant in enumerate((0, 1, 2, 3, 4)):
-    expected = next(item for item in EXPECTED.values() if item["variant"] == variant)
-    rows = station_rows[offset * 9:(offset + 1) * 9]
-    assert tuple(row[0] for row in rows) == expected["names"]
-    assert tuple(float(row[1]) for row in rows) == expected["arms"]
-    assert tuple(float(row[2]) for row in rows) == expected["maxima"]
+for contract in installer.ACF_CONTRACTS:
+    fixture = next(row for row in fixtures if row["name"] == contract["name"])
+    baseline = {**fixture["text"], **fixture["number"]}
+    check(contract, baseline, True)
+    # Each numeric change is intentional test input, NOT a new aircraft baseline.
+    for key, value in {
+        "acf/_fixed_ref/2,2": 26.5, "acf/_fixed_max/0": 4300,
+        "acf/_m_empty": 81000, "acf/_cgZ": 46,
+        "acf/_average_mac_acf": 15.1, "acf/_cgZ_fwd": 44,
+        "acf/_cgZ_aft": 68, "acf/_m_max": 190000,
+        "acf/_m_fuel_max_tot": 53000, "acf/_tank_xyz/0,2": 60,
+        "acf/_tank_xyz_full/0,2": 66, "acf/_fixed_role/7": 0,
+    }.items():
+        check(contract, {**baseline, key: value}, True)
+    for key, value in {
+        "acf/_fixed_name/2": "Cargo1", "acf/_fixed_max/count": 8,
+        "acf/_fixed_max/0": 0, "acf/_fixed_ref/4,2": "nan",
+        "acf/_average_mac_acf": 0, "acf/_m_empty": -1,
+        "acf/_m_max": 1, "acf/_cgZ_fwd": 100,
+        "acf/_tank_rat/3": 0.01, "acf/_tank_rat/0": 0.2,
+        "acf/_tank_xyz_full/1,2": "inf", "acf/_tank_name/0": "Center Wing",
+    }.items():
+        check(contract, {**baseline, key: value}, False)
+    for key in ("acf/_m_empty", "acf/_average_mac_acf", "acf/_fixed_ref/0,2"):
+        missing = dict(baseline)
+        del missing[key]
+        check(contract, missing, False)
 
-print("PASS: exact -600/-700/-800/-900/-900ER overlay fields, Lua provenance and installer contracts")
+print("PASS: all five author fixtures, dynamic W&B geometry accepted, malformed/layout changes rejected")
