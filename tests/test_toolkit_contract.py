@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 MODULE_MANIFEST = REPOSITORY / "toolkit/weight-and-balance-module.json"
-ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.5.0.json"
+ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.5.1.json"
 TABLET_LOADER_PATCH = REPOSITORY / "patches/B738.tablet.loader.json"
 TABLET_PATCH = REPOSITORY / "patches/B738.tablet.lua.json"
 FMS_PATCH = REPOSITORY / "patches/B738.a_fms.lua.json"
@@ -71,7 +71,7 @@ manifest = json.loads(MODULE_MANIFEST.read_text(encoding="utf-8"))
 assert manifest["schemaVersion"] == 1
 assert manifest["manifestType"] == "levelup-compatibility-module-source"
 assert manifest["moduleId"] == "weight-and-balance"
-assert manifest["moduleVersion"] == "0.5.0"
+assert manifest["moduleVersion"] == "0.5.1"
 assert manifest["toolkitIntegration"]["directCatalogEntry"] is False
 assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [3, 2, 0, 1, 4]
 
@@ -132,7 +132,7 @@ installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
 contract = json.loads(ACF_CONTRACT.read_text(encoding="utf-8"))
 assert contract["schemaVersion"] == 1
-assert contract["packageVersion"] == "0.5.0"
+assert contract["packageVersion"] == "0.5.1"
 json_contracts = {entry["name"]: entry for entry in contract["variants"]}
 installer_contracts = {entry["name"]: entry for entry in installer.ACF_CONTRACTS}
 assert set(json_contracts) == set(installer_contracts)
@@ -141,5 +141,11 @@ for name, expected in installer_contracts.items():
     assert actual["version"] == expected["version"]
     assert actual["text"] == expected["text"]
     assert actual["number"] == expected["number"]
+    assert actual.get("textAlternatives", {}) == expected.get("textAlternatives", {})
+
+assert json_contracts["737_60NG.acf"]["textAlternatives"] == {"acf/_tank_name/2": ["Right Wing"]}
+assert json_contracts["737_70NG.acf"]["textAlternatives"] == {"acf/_fixed_name/8": ["Galley R"]}
+assert json_contracts["737_60NG.acf"]["text"]["acf/_tank_name/2"] == "Right Main"
+assert json_contracts["737_70NG.acf"]["text"]["acf/_fixed_name/8"] == "Galley A"
 
 print("PASS: Toolkit module payloads, structural Tablet/FMS patches and semantic ACF contract")

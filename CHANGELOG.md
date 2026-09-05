@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.1 - 2026-09-05
+
+- Accepts the renamed -600 right tank (`Right Main`) and -700 aft service
+  station (`Galley A`), plus their old `Right Wing` / `Galley R` labels.
+- Aliases are restricted to the original variant and index. Unknown names,
+  missing entries and swapped stations/tanks remain rejected.
+- Installer and runtime Lua use the same acceptance contract. Toolkit module
+  metadata includes canonical names and explicit `textAlternatives`; a strict
+  canonical-only consumer accepts the new ACFs but needs alternatives support
+  for old names. Consolidated Toolkit publication is a separate integration.
+- No ACF, flight-model, dofile/hook position, mass/moment, fuel policy, FMC
+  trim table or private-port changes. Runtime CG reports remain separate.
+- Validation details: `VALIDATION_0.5.1.md`.
+
 ## 0.5.0 - 2026-09-05
 
 - Replaces fixed numeric variant tables with loaded-aircraft DataRef snapshots.

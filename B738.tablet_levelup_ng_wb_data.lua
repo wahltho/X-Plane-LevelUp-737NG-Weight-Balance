@@ -2,8 +2,8 @@
 -- Policy only: no variant geometry, mass, or capacity is hard-coded here.
 local M = {}
 for id, row in pairs({
-    [3] = { "737-600", "737_60NG.acf", "Galley A", "Right Wing" },
-    [2] = { "737-700", "737_70NG.acf", "Galley R", "Right Main" },
+    [3] = { "737-600", "737_60NG.acf", "Galley A", "Right Main" },
+    [2] = { "737-700", "737_70NG.acf", "Galley A", "Right Main" },
     [0] = { "737-800", "737_80NG.acf", "Galley A", "Right Main" },
     [1] = { "737-900", "737_90NG.acf", "Galley A", "Right Main" },
     [4] = { "737-900ER", "737_9ENG.acf", "Galley A", "Right Main" },
@@ -16,6 +16,14 @@ for id, row in pairs({
         -- Existing loading/fuel policies, not values inferred from geometry.
         taxi_fuel_kg = 226.8, station_rate_kg_s = 222,
     }
+end
+
+-- FIX: accept only the two documented legacy labels at their original indices.
+-- Names identify slots; aliases never move a station/tank or change its geometry.
+local function matches_name(actual, expected, variant, kind, index)
+    if actual == expected then return true end
+    return (variant == 3 and kind == "tank" and index == 2 and actual == "Right Wing") or
+        (variant == 2 and kind == "station" and index == 8 and actual == "Galley R")
 end
 
 local function finite(value)
@@ -48,12 +56,14 @@ function M.read_metadata(path, policy)
         if tonumber(fields["acf/" .. key]) ~= count then return nil, "unsupported ACF array: " .. key end
     end
     for i = 1, 9 do
-        if fields["acf/_fixed_name/" .. (i - 1)] ~= policy.station_names[i] then
+        if not matches_name(fields["acf/_fixed_name/" .. (i - 1)], policy.station_names[i],
+                policy.variant_id, "station", i - 1) then
             return nil, "station order/name mismatch at index " .. (i - 1)
         end
     end
     for i = 1, 3 do
-        if fields["acf/_tank_name/" .. (i - 1)] ~= policy.tank_names[i] then
+        if not matches_name(fields["acf/_tank_name/" .. (i - 1)], policy.tank_names[i],
+                policy.variant_id, "tank", i - 1) then
             return nil, "tank order/name mismatch at index " .. (i - 1)
         end
     end

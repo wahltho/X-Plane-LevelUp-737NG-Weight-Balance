@@ -430,6 +430,25 @@ update_payload()
 total_payload_entry("12345")
 assert(zone_cargo1 == 99999 and zone_cargo2 == 99999)
 for i = 0, 8 do assert(simDR_payload_stations[i] == 0) end
+-- Label-only ACF reloads preserve current/predicted CG and external ownership.
+for _, variant in ipairs({3, 2}) do
+    B738DR_b737_variant = variant
+    metadata_changes = {}
+    establish_xplane_reference(variant, empty_stations)
+    flight_start()
+    adapter.frame_update()
+    local before = { calc_mac(0), calc_zfw_mac(), calc_mac(1), calc_oew_mac(), calc_des_mac(2000) }
+    local handoff = B738DR_calc_to_cg
+    if variant == 3 then metadata_changes["_tank_name/2"] = "Right Main"
+    else metadata_changes["_fixed_name/8"] = "Galley A" end
+    flight_start()
+    assert(B738DR_calc_to_cg == 0, "reload retires the old FMC handoff")
+    adapter.frame_update()
+    local after = { calc_mac(0), calc_zfw_mac(), calc_mac(1), calc_oew_mac(), calc_des_mac(2000) }
+    for i = 1, #before do assert(math.abs(after[i] - before[i]) < 1e-10, "label-only CG invariance") end
+    assert(handoff == B738DR_calc_to_cg, "label-only FMC handoff invariance")
+    for i = 0, 8 do assert(simDR_payload_stations[i] == 0, "external reload is read-only") end
+end
 io.open = real_open
 
 B738DR_calc_to_cg = 22

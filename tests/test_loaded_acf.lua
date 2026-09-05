@@ -5,7 +5,9 @@ local data = dofile(root .. "/B738.tablet_levelup_ng_wb_data.lua")
 local core = dofile(root .. "/B738.tablet_levelup_ng_wb_core.lua")
 for _, variant in ipairs({3, 2, 0, 1, 4}) do
     local policy = data[variant]
-    local path = aircraft_root .. "/" .. policy.acf_name
+    local source_root = aircraft_root
+    if arg[2] and arg[2] ~= "" and (variant == 3 or variant == 2) then source_root = arg[2] end
+    local path = source_root .. "/" .. policy.acf_name
     local metadata = assert(data.read_metadata(path, policy))
     local numbers = {}
     for line in io.lines(path) do

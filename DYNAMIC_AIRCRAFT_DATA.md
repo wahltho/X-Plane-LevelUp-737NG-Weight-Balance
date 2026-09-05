@@ -1,7 +1,7 @@
-# Loaded-aircraft W&B contract — 0.5.0 source
+# Loaded-aircraft W&B contract — 0.5.x source
 
-Status: 0.5.0 source and automated regression/package checks complete.
-No aircraft deploy or simulator-runtime test. See `VALIDATION_0.5.0.md`.
+Status: automated regression/package checks complete; 0.5.1 adds name aliases only.
+No aircraft deploy or simulator-runtime test. See `VALIDATION_0.5.1.md`.
 
 ## Scope and invariant
 
@@ -101,7 +101,9 @@ repository/catalog is modified; the Toolkit owner must import this release.
 ## Deliberately unchanged constraints
 
 - Nine stations: cargo 0/1, passenger zones 2–6, service 7/8. Existing per-variant
-  names (including Galley R/A and Right Main/Wing) are retained. Role categories
+  names are checked by slot. Since 0.5.1, the -600 right tank accepts
+  Right Main or legacy Right Wing; the -700 aft galley accepts Galley A or
+  legacy Galley R. These aliases are not accepted at other indices/variants. Role categories
   are not a mass/moment input and remain outside the gate.
 - Pilots belong to empty mass; cabin crew are split 50/50, with the respective
   forward/aft galley selections added. The aircraft author must preserve that

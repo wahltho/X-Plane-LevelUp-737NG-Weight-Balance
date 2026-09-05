@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "manifestType": "levelup-compatibility-module-source",
   "moduleId": "weight-and-balance",
-  "moduleVersion": "0.5.0",
+  "moduleVersion": "0.5.1",
   "displayName": "LevelUp 737NG Weight and Balance",
   "description": "Loaded-aircraft W&B geometry, X-Plane station ownership, current/predicted CG and existing FMC handoffs.",
   "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
@@ -63,8 +63,8 @@
     },
     {
       "path": "B738.tablet_levelup_ng_wb_data.lua",
-      "size": 5425,
-      "sha256": "bbc2c920e1062727c534c7f4fb7dcd458aa6605f0fd4bbb257dc35be81eaf8a8"
+      "size": 6018,
+      "sha256": "5f42871146b5f21f91c79689ec7a105212e79d95f21a0b4f0e56bf94983dfa8f"
     },
     {
       "path": "B738.tablet_levelup_ng_wb_core.lua",
@@ -77,9 +77,9 @@
       "sha256": "94a715e34e9133b01ad373e21d9d6e598c0a6661125c482405f27fda47b38e82"
     },
     {
-      "path": "contracts/levelup-ng-wb-acf-v0.5.0.json",
-      "size": 6397,
-      "sha256": "19664cfd720940e6fddb8690e159d100548bbba7c2caea58f914514c5af6feb4"
+      "path": "contracts/levelup-ng-wb-acf-v0.5.1.json",
+      "size": 6556,
+      "sha256": "709edd11f1cd1d55debd103df6bc4094af927bf1edbfb5c32a4680cd304ff73e"
     }
   ],
   "targets": [
@@ -102,7 +102,7 @@
       "operation": "copy-file-v1",
       "payload": "B738.tablet_levelup_ng_wb_data.lua",
       "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
-      "resultSha256": "bbc2c920e1062727c534c7f4fb7dcd458aa6605f0fd4bbb257dc35be81eaf8a8"
+      "resultSha256": "5f42871146b5f21f91c79689ec7a105212e79d95f21a0b4f0e56bf94983dfa8f"
     },
     {
       "operation": "copy-file-v1",
@@ -118,14 +118,14 @@
     }
   ],
   "acfContract": {
-    "path": "contracts/levelup-ng-wb-acf-v0.5.0.json",
-    "size": 6397,
-    "sha256": "19664cfd720940e6fddb8690e159d100548bbba7c2caea58f914514c5af6feb4"
+    "path": "contracts/levelup-ng-wb-acf-v0.5.1.json",
+    "size": 6556,
+    "sha256": "709edd11f1cd1d55debd103df6bc4094af927bf1edbfb5c32a4680cd304ff73e"
   },
   "toolkitIntegration": {
     "transactionModel": "LevelUp compatibility package schema 3",
     "directCatalogEntry": false,
     "reason": "This repository is the canonical module source. End users receive it through the consolidated LevelUp compatibility package.",
-    "openRequirement": "Validate the schema-1 station/tank layout before enabling. The shared runtime performs full numeric sanity and symmetric-tank validation; exact numeric W&B geometry is no longer pinned."
+    "openRequirement": "Validate the schema-1 station/tank layout before enabling. Canonical names are in text; optional textAlternatives lists exact legacy names by field and variant. Canonical-only validators accept corrected ACFs; supporting old names requires those alternatives. Runtime performs full numeric sanity and symmetric-tank validation; numeric geometry is not pinned."
   }
 }

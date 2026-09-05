@@ -15,11 +15,12 @@ from pathlib import Path
 PACKAGE = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 parser.add_argument("--aircraft-root", type=Path)
+parser.add_argument("--updated-aircraft-root", type=Path)
 parser.add_argument("--lua51-syntax", action="store_true")
 args = parser.parse_args()
 # Independent frozen author inputs; the new installer has no numeric geometry.
 FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.0.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.1.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -48,8 +49,8 @@ EXPECTED = {
     "OWNER_CLOSURE.md",
     "RUNTIME_TEST_PLAN.md",
     "DYNAMIC_AIRCRAFT_DATA.md",
-    "VALIDATION_0.5.0.md",
-    "RELEASE_NOTES_0.5.0.md",
+    "VALIDATION_0.5.1.md",
+    "RELEASE_NOTES_0.5.1.md",
     "ACF_RECONCILE_2026_08_22.md",
     "ACF_RECONCILE_2026_08_23.md",
     "ACF_RECONCILE_2026_08_25.md",
@@ -59,7 +60,7 @@ EXPECTED = {
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.5.0.json",
+    "contracts/levelup-ng-wb-acf-v0.5.1.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -103,7 +104,10 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         shutil.copy2(FMS_BASELINE, fms / "B738.a_fms.lua")
         for contract in installer.ACF_CONTRACTS:
             if args.aircraft_root:
-                shutil.copy2(args.aircraft_root / contract["name"], aircraft / contract["name"])
+                source = args.aircraft_root
+                if args.updated_aircraft_root and contract["variantId"] in (3, 2):
+                    source = args.updated_aircraft_root
+                shutil.copy2(source / contract["name"], aircraft / contract["name"])
             else:
                 write_contract_acf(aircraft / str(contract["name"]), contract)
         completed = subprocess.run(
@@ -127,4 +131,4 @@ with zipfile.ZipFile(ARCHIVE) as archive:
                 LuaRuntime().execute("assert(loadfile(...))", str(path))
                 print("PASS packaged Lua 5.1 syntax: " + path.name)
 
-print("PASS: v0.5.0 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")
+print("PASS: v0.5.1 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")

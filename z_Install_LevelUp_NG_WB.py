@@ -26,7 +26,7 @@ PACKAGE_ID = "levelup-737ng-weight-balance-test-balloon"
 
 # Numeric geometry belongs to the loaded aircraft. This schema-1 contract
 # retains only the supported station/tank layout for both install paths.
-ACF_CONTRACT_PATH = Path(__file__).resolve().parent / "contracts/levelup-ng-wb-acf-v0.5.0.json"
+ACF_CONTRACT_PATH = Path(__file__).resolve().parent / "contracts/levelup-ng-wb-acf-v0.5.1.json"
 ACF_CONTRACTS = tuple(json.loads(ACF_CONTRACT_PATH.read_text(encoding="utf-8"))["variants"])
 
 PAYLOADS = (
@@ -138,7 +138,7 @@ def verify_package() -> str:
         raise SystemExit(2)
 
     required = (*PAYLOADS, *FRAGMENTS, Path("z_Install_LevelUp_NG_WB.py"),
-                Path("contracts/levelup-ng-wb-acf-v0.5.0.json"))
+                Path("contracts/levelup-ng-wb-acf-v0.5.1.json"))
     for path in required:
         require(path)
         expected = payloads.get(path.as_posix())
@@ -188,7 +188,8 @@ def verify_acf(path: Path, contract: dict[str, object]) -> None:
     version = str(contract["version"])
     for key, expected in dict(contract["text"]).items():
         actual = fields.get(key)
-        if actual != expected:
+        alternatives = contract.get("textAlternatives", {}).get(key, [])
+        if actual != expected and actual not in alternatives:
             acf_contract_error(path, version, key, actual, expected)
     for key, expected in dict(contract["number"]).items():
         serialized = fields.get(key)

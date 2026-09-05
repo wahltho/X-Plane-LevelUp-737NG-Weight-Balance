@@ -5,7 +5,13 @@ baseline aircraft and Lua files.
 
 ## Instrumentation
 
-For 0.5.0 also record runtime empty/max mass, reference CG, station arms/maxima,
+For 0.5.1, first confirm old and corrected -600/-700 labels load without a
+station/tank name warning. Fully reload after changing an ACF; metadata is
+cached per aircraft load. Compare unchanged loading with label-only changes:
+current/predicted CG, FMC handoff and external station masses must be identical.
+The alias release does not close the separately reported GW/TO/OEW CG anomalies.
+
+For 0.5.0 and later also record runtime empty/max mass, reference CG, station arms/maxima,
 fuel capacities/ratios/empty/full offsets, loaded ACF path and its MAC/limits.
 In a disposable aircraft copy, change one numeric family at a time and reload
 the same variant: verify the new geometry is used without a package update.
@@ -27,7 +33,7 @@ Capture for every case:
 Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all five layouts pass the v0.5.0 installer. Record loaded numeric
+1. Confirm all five layouts pass the v0.5.1 installer. Record loaded numeric
    DataRefs and ACF metadata; the previous exact numeric gates no longer apply.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG

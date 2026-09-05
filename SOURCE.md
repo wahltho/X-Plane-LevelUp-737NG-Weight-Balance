@@ -1,6 +1,8 @@
 # Evidence and derivation
 
-For 0.5.0, see `DYNAMIC_AIRCRAFT_DATA.md` and `VALIDATION_0.5.0.md`. The numeric tables
+For the 0.5.x geometry contract, see `DYNAMIC_AIRCRAFT_DATA.md`. The 0.5.1
+name-only compatibility update and input hashes are in `VALIDATION_0.5.1.md`.
+The numeric tables
 below remain historical provenance and regression inputs, not runtime lookup
 tables or exact installation requirements. No new author ACF was adopted.
 
