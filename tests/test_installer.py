@@ -27,7 +27,7 @@ V020_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.0.zip
 V021_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.1.zip"
 V022_ARCHIVE = PACKAGE / "remote_release/levelup-737ng-weight-balance-v0.2.2.zip"
 FILES = (
-    "contracts/levelup-ng-wb-acf-v0.5.1.json",
+    "contracts/levelup-ng-wb-acf-v0.5.2.json",
     "B738.tablet_levelup_ng_wb_data.lua",
     "B738.tablet_levelup_ng_wb_core.lua",
     "B738.tablet_levelup_ng_wb_adapter.lua",
@@ -252,8 +252,8 @@ def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool 
         fms_original = fms_target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.5.1" in first.stdout
-        assert "Verified package payload: v0.5.1" in first.stdout
+        assert "Installed v0.5.2" in first.stdout
+        assert "Verified package payload: v0.5.2" in first.stdout
         assert first.stdout.count("Verified levelup-ng-wb-layout-v1:") == 5
         for contract in installer.ACF_CONTRACTS:
             assert contract["name"] in first.stdout
@@ -403,7 +403,7 @@ def exercise_v014_upgrade() -> None:
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
         result = run(folder)
-        assert "Installed v0.5.1" in result.stdout
+        assert "Installed v0.5.2" in result.stdout
         upgraded = target.read_text(encoding="utf-8")
         assert "LEVELUP_700_WB" not in upgraded
         assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
@@ -458,9 +458,9 @@ def exercise_v020_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.5.1" in result.stdout
+        assert "Verified package payload: v0.5.2" in result.stdout
         assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.1" in result.stdout
+        assert "Installed v0.5.2" in result.stdout
         assert target.read_bytes() == installed_v020
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v020
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -523,10 +523,10 @@ def exercise_v021_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.5.1" in result.stdout
+        assert "Verified package payload: v0.5.2" in result.stdout
         assert "Verified levelup-ng-wb-layout-v1" in result.stdout
         assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.1" in result.stdout
+        assert "Installed v0.5.2" in result.stdout
         assert target.read_bytes() == installed_v021
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v021
         assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
@@ -554,10 +554,10 @@ def exercise_v022_upgrade() -> None:
             shutil.copy2(PACKAGE / name, folder / name)
 
         result = run(folder)
-        assert "Verified package payload: v0.5.1" in result.stdout
+        assert "Verified package payload: v0.5.2" in result.stdout
         assert "Verified levelup-ng-wb-layout-v1" in result.stdout
         assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.1" in result.stdout
+        assert "Installed v0.5.2" in result.stdout
         assert target.read_bytes() == installed_v022
         assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v022
         fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
@@ -600,15 +600,15 @@ def exercise_fms_zfw_formula_oracle() -> None:
         assert abs(expected - inherited_stock - 524.0) < 1e-9
 
 
-def exercise_v050_upgrade() -> None:
-    archive_path = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.0.zip"
+def exercise_v05x_upgrade(version: str) -> None:
+    archive_path = PACKAGE / f"dist/LevelUp-737NG-Weight-Balance-v{version}.zip"
     expected_hash = archive_path.with_suffix(".zip.sha256").read_text().split()[0]
     assert digest(archive_path) == expected_hash
     temporary, folder = setup(performance_blocks=True, descent_blocks=True)
     try:
         with zipfile.ZipFile(archive_path) as archive:
             archive.extractall(folder)
-        assert "Installed v0.5.0" in run(folder).stdout
+        assert f"Installed v{version}" in run(folder).stdout
         tablet = folder / "B738.tablet.lua"
         fms = folder.parent / "B738.a_fms/B738.a_fms.lua"
         source_hashes = (digest(tablet), digest(fms))
@@ -620,9 +620,9 @@ def exercise_v050_upgrade() -> None:
             (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
         upgraded = run(folder).stdout
-        assert "Verified package payload: v0.5.1" in upgraded
+        assert "Verified package payload: v0.5.2" in upgraded
         assert "hooks are already in the requested state" in upgraded
-        assert source_hashes == (digest(tablet), digest(fms)), "alias update must not move/change hooks"
+        assert source_hashes == (digest(tablet), digest(fms)), "data-module update must not move/change hooks"
         assert (folder / "B738.tablet_levelup_ng_wb_data.lua").read_bytes() == (PACKAGE / "B738.tablet_levelup_ng_wb_data.lua").read_bytes()
         run(folder)
         assert source_hashes == (digest(tablet), digest(fms)), "idempotent upgrade"
@@ -647,7 +647,8 @@ exercise_v014_upgrade()
 exercise_v020_upgrade()
 exercise_v021_upgrade()
 exercise_v022_upgrade()
-exercise_v050_upgrade()
+exercise_v05x_upgrade("0.5.0")
+exercise_v05x_upgrade("0.5.1")
 exercise_performance_installed_second()
 exercise_descent_tables_installed_second()
 exercise_fms_zfw_formula_oracle()

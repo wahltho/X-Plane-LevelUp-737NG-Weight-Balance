@@ -134,7 +134,7 @@ local function install_geometry(variant)
     live["sim/aircraft/weight/acf_m_fuel_tot"] = literal[variant].fuel_total * LB_TO_KG
     local arms, maxima, empty, full, ratios = {}, {}, {}, {}, {}
     for i = 0, 8 do
-        arms[i], maxima[i] = data.stations[i + 1].arm_m, data.stations[i + 1].max_kg
+        arms[i], maxima[i] = data.stations[i + 1].arm_m - data.empty_cg_z_m, data.stations[i + 1].max_kg
         ratios[i] = i < 3 and ({0.187000006, 0.625999987, 0.187000006})[i + 1] or 0
         empty[i] = i < 3 and data.tanks[i + 1].empty_arm_m - data.empty_cg_z_m or 0
         full[i] = i < 3 and data.tanks[i + 1].full_arm_m - data.empty_cg_z_m or 0

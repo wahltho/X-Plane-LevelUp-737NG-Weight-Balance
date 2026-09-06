@@ -1,14 +1,15 @@
 # LevelUp 737NG weight-and-balance compatibility patch
 
-## Version 0.5.1
+## Version 0.5.2
 
-0.5.1 accepts the corrected -600 tank label `Right Main` and -700 aft-galley
-label `Galley A`, while retaining the legacy `Right Wing` / `Galley R` labels
-at those same variant-specific indices. No CG, trim or loading formulas change.
+0.5.2 fixes the runtime payload-station coordinate conversion: X-Plane supplies
+CG-relative metres, not absolute arms. Adding the original reference CG once
+restores consistent OEW, takeoff and landing moments. The 0.5.1 name aliases
+remain supported. No ACF, flight-model, loading policy or FMC trim table changes.
 Since 0.5.0 the patch reads numeric W&B geometry from the loaded aircraft.
 Lua 5.1 regressions, all five current author ACFs, installer/coexistence,
 Toolkit contract and packaged installation checks pass. Simulator acceptance
-remains pending; see `VALIDATION_0.5.1.md`.
+remains pending; see `VALIDATION_0.5.2.md`.
 See `DYNAMIC_AIRCRAFT_DATA.md` for the new owner contract and units.
 The historical release description and numeric table below document 0.4.2;
 those numbers are no longer production inputs or exact installation gates.
@@ -16,7 +17,7 @@ those numbers are no longer production inputs or exact installation gates.
 This repository is the canonical source for the unofficial patch that integrates
 Jochen Heiden's LevelUp
 `737_60NG.acf`, `737_70NG.acf`, `737_80NG.acf`, `737_90NG.acf` and `737_9ENG.acf` with the
-unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.5.1`
+unmodified upstream Zibo 4.05.35 `zibomod.xpl`, Tablet Lua and FMS Lua. Release `v0.5.2`
 supports Variant-IDs `3/2/0/1/4` (`737-600/-700/-800/-900/-900ER`) from one package.
 Every MAX variant and stock Zibo delegate to the original Tablet
 functions.
@@ -72,7 +73,7 @@ semantics. No W&B hook or runtime behavior changed.
 
 ## ACF contracts
 
-The 0.5.1 installer verifies layout and numeric sanity, not exact arms/masses
+The 0.5.2 installer verifies layout and numeric sanity, not exact arms/masses
 or whole-file checksums. The following table records the historical inputs:
 
 | Variant | ID | ACF contract | Empty / max mass | MAC |
@@ -97,8 +98,8 @@ margins.
 See `INSTALLATION.md`. Versioned distributable archives and their SHA-256
 checksum files are published on the repository's GitHub Releases page:
 
-- `LevelUp-737NG-Weight-Balance-v0.5.1.zip`
-- `LevelUp-737NG-Weight-Balance-v0.5.1.zip.sha256`
+- `LevelUp-737NG-Weight-Balance-v0.5.2.zip`
+- `LevelUp-737NG-Weight-Balance-v0.5.2.zip.sha256`
 
 Extract the archive directly into `plugins/xlua/scripts/B738.tablet/`, then
 run:
@@ -138,7 +139,7 @@ python3 tests/test_toolkit_contract.py
 ```
 
 Use a Lua 5.1-compatible interpreter/compiler. Run only with explicit test
-approval; results for 0.5.1 are recorded in `VALIDATION_0.5.1.md`. The historical private
+approval; results for 0.5.2 are recorded in `VALIDATION_0.5.2.md`. The historical private
 overlay audit is separate from public dynamic-data acceptance.
 No plugin build or modified binary is involved.
 
@@ -153,7 +154,7 @@ The source handoff is machine-readable:
 
 - `patches/B738.tablet.lua.json` contains the five structural Tablet changes;
 - `patches/B738.a_fms.lua.json` contains the two structural FMS changes;
-- `contracts/levelup-ng-wb-acf-v0.5.1.json` contains the structural ACF fields
+- `contracts/levelup-ng-wb-acf-v0.5.2.json` contains the structural ACF fields
   required by the five supported variants;
 - `toolkit/weight-and-balance-module.json` binds payload hashes, target paths,
   variant IDs and the intended schema-3 operations.

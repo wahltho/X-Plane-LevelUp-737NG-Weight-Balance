@@ -77,7 +77,9 @@ function M.read_metadata(path, policy)
 end
 
 -- A complete immutable-for-the-frame snapshot. Runtime masses are kg,
--- original CG is ft, station arms are absolute m, tank endpoints are offset m.
+-- original CG is ft; native station arms and tank endpoints are CG-relative m.
+-- Normalize stations to absolute m here, just like the tank endpoints below.
+-- Station datum verified against all nine native DRT values on 2026-09-06.
 -- Tank units verified by the native X-Plane 12.4.3-r2 sweep (2026-08-20).
 function M.snapshot(policy, metadata, input)
     if not metadata then return nil, "ACF metadata unavailable" end
@@ -104,6 +106,8 @@ function M.snapshot(policy, metadata, input)
         if not finite(ratio) or ratio < 0 or (i < 3 and ratio <= 0) or (i >= 3 and ratio ~= 0) then
             return nil, "unsupported tank layout at index " .. i
         end
+        arm = data.empty_cg_z_m + arm
+        if not finite(arm) then return nil, "invalid absolute station arm" end
         data.stations[i + 1] = { name = policy.station_names[i + 1], arm_m = arm, max_kg = maximum }
         total_ratio = total_ratio + ratio
         if i < 3 then

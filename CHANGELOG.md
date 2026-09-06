@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.2 - 2026-09-06
+
+- Fix native station CG-relative metres being treated as absolute arms.
+  Normalize once before all shared payload/CG moment calculations.
+- Correct SDK/Lua test inputs, preserving independent mass/moment oracles;
+  add nine measured offsets and the original upstream payload/graph partial replay.
+- Retain name aliases, loading/fuel policies, EXT read-only ownership, hook
+  placement, other-patch coexistence and unmodified FMC trim tables.
+- No ACF, airfoil or flight-model edits. Runtime revalidation remains required.
+- Validation: `VALIDATION_0.5.2.md`.
+
 ## 0.5.1 - 2026-09-05
 
 - Accepts the renamed -600 right tank (`Right Main`) and -700 aft service

@@ -1,7 +1,9 @@
 # Evidence and derivation
 
-For the 0.5.x geometry contract, see `DYNAMIC_AIRCRAFT_DATA.md`. The 0.5.1
-name-only compatibility update and input hashes are in `VALIDATION_0.5.1.md`.
+For the corrected 0.5.x geometry contract, see `DYNAMIC_AIRCRAFT_DATA.md`.
+The measured station-datum correction and checks are in `VALIDATION_0.5.2.md`.
+Older evidence below is historical; stations from the native runtime are
+CG-relative metres and are normalized to absolute metres at the input boundary.
 The numeric tables
 below remain historical provenance and regression inputs, not runtime lookup
 tables or exact installation requirements. No new author ACF was adopted.

@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 REPOSITORY = Path(__file__).resolve().parents[1]
-VERSION = "v0.5.1"
+VERSION = "v0.5.2"
 ARCHIVE_NAME = f"LevelUp-737NG-Weight-Balance-{VERSION}.zip"
 RELEASE_FILES = (
     "B738.tablet_levelup_ng_wb_data.lua",
@@ -25,7 +25,7 @@ RELEASE_FILES = (
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.5.1.json",
+    "contracts/levelup-ng-wb-acf-v0.5.2.json",
     "toolkit/weight-and-balance-module.json",
     "README.md",
     "INSTALLATION.md",
@@ -33,8 +33,8 @@ RELEASE_FILES = (
     "OWNER_CLOSURE.md",
     "RUNTIME_TEST_PLAN.md",
     "DYNAMIC_AIRCRAFT_DATA.md",
-    "VALIDATION_0.5.1.md",
-    "RELEASE_NOTES_0.5.1.md",
+    "VALIDATION_0.5.2.md",
+    "RELEASE_NOTES_0.5.2.md",
     "ACF_RECONCILE_2026_08_22.md",
     "ACF_RECONCILE_2026_08_23.md",
     "ACF_RECONCILE_2026_08_25.md",
@@ -42,7 +42,7 @@ RELEASE_FILES = (
     "CHANGELOG.md",
     "LICENSE",
 )
-ZIP_TIMESTAMP = (2026, 9, 5, 0, 0, 0)
+ZIP_TIMESTAMP = (2026, 9, 6, 0, 0, 0)
 
 
 def main() -> int:

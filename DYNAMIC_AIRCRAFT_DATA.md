@@ -1,7 +1,7 @@
 # Loaded-aircraft W&B contract — 0.5.x source
 
-Status: automated regression/package checks complete; 0.5.1 adds name aliases only.
-No aircraft deploy or simulator-runtime test. See `VALIDATION_0.5.1.md`.
+Version 0.5.2 corrects the native station datum using the 2026-09-06 DRT capture.
+No aircraft deploy or simulator-runtime test. See `VALIDATION_0.5.2.md`.
 
 ## Scope and invariant
 
@@ -22,7 +22,7 @@ for supported LevelUp IDs.
 |---|---|---|
 | Empty mass, max gross | `sim/aircraft/weight/acf_m_empty`, `acf_m_max` | runtime kg |
 | Reference CG | `sim/aircraft/weight/acf_cgZ_original` | ft × 0.3048 = absolute m |
-| Station longitudinal arms | `sim/aircraft/weight/acf_stations_ref_z[0..8]` | absolute m |
+| Station longitudinal arms | `sim/aircraft/weight/acf_stations_ref_z[0..8]` | CG-relative m + reference CG in m = absolute m |
 | Station maxima | `sim/aircraft/weight/acf_m_station_max[0..8]` | kg |
 | Total fuel capacity | `sim/aircraft/weight/acf_m_fuel_tot` | runtime kg, NOT lb |
 | Tank capacity fractions | `sim/aircraft/overflow/acf_tank_rat[0..8]` | dimensionless |
@@ -53,6 +53,7 @@ are not sufficiently established. The file is read using upstream
 All moments below are kg m in the same absolute, positive-aft datum:
 
 ```text
+stationArmM = referenceFt × 0.3048 + nativeStationOffsetM
 tankCapacity = totalFuelKg × tankRatio
 tankArm = referenceM + emptyOffsetM
           + (fullOffsetM − emptyOffsetM) × clamp(fuelKg/tankCapacity, 0, 1)
@@ -61,6 +62,14 @@ ZFW_MAC = currentMAC + (zfwOffsetM − currentOffsetM) / MAC_M × 100
 LEMAC_M = modeledCurrentZfwCG_M − ZFW_MAC/100 × MAC_M
 predictedMAC = (predictedCG_M − LEMAC_M) / MAC_M × 100
 ```
+
+The native station capture has reference CG 60.34 ft and first station
+-7.412736 m. Its absolute arm is 18.391632 - 7.412736 = 10.978896 m,
+or 36.02 ft, matching the ACF. All nine captured stations agree within
+2 micrometres of the rounded independent ACF coordinates. The local DataRefs
+description saying origin-relative is not used as an oracle against this
+measurement. Earlier 0.5.0/0.5.1 mocks duplicated the wrong absolute-arm
+assumption; corrected inputs retain the independent moment expectations.
 
 Independent existing -600 control: total mass 56228.0082836786 kg,
 moment 771543.5328944295 kg m, CG 13.721694159997247 m. These

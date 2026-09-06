@@ -1,10 +1,11 @@
 # Owner and closure matrix
 
-See `DYNAMIC_AIRCRAFT_DATA.md` for the 0.5.0 source contract and
-`VALIDATION_0.5.1.md` for the latest passing dry/package tests, including
+See `DYNAMIC_AIRCRAFT_DATA.md` for the corrected 0.5.2 source contract and
+`VALIDATION_0.5.2.md` for the latest passing dry/package tests, including
+CG-relative input conversion, upstream partial payload/graph replay,
 variant/index-scoped old/new name acceptance and alias-only reload invariance.
 The historical runtime
-observations below do not establish new 0.5.0 simulator acceptance.
+observations below do not establish 0.5.2 simulator acceptance.
 
 | Chain element | Owner for IDs 3/2/0/1/4 | Input / unit | Consumer | Dry evidence | Runtime status |
 |---|---|---|---|---|---|

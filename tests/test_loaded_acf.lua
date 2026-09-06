@@ -23,7 +23,7 @@ for _, variant in ipairs({3, 2, 0, 1, 4}) do
         station_z = {}, station_max = {}, tank_rat = {}, tank_empty = {}, tank_full = {},
     }
     for i = 0, 8 do
-        input.station_z[i] = n("_fixed_ref/" .. i .. ",2") * 0.3048
+        input.station_z[i] = (n("_fixed_ref/" .. i .. ",2") - input.reference_ft) * 0.3048
         input.station_max[i] = n("_fixed_max/" .. i) * 0.45359237
         input.tank_rat[i] = n("_tank_rat/" .. i)
         input.tank_empty[i] = (n("_tank_xyz/" .. i .. ",2") - input.reference_ft) * 0.3048

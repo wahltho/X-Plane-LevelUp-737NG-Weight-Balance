@@ -5,6 +5,16 @@ baseline aircraft and Lua files.
 
 ## Instrumentation
 
+For 0.5.2, repeat the reported engines-running -600 case: enter 100 PAX,
+wait for loading completion, then open page 3/4. Record the nine native
+station offsets and original CG alongside all values below. Check each
+`offset_m + original_cg_ft * 0.3048` against its absolute ACF station arm.
+Compare OEW (including service mass), TO after taxi and LW using independent
+mass/moment arithmetic. Compare `calc_to_cg` to `real_cg_mac` (%MAC), NOT
+`real_cg` (metres). Repeat with 0/100/500 kg center fuel and crew/galley on/off.
+Re-accept CG on TAKEOFF REF to verify downstream FMC/trim; this patch does not
+overwrite previously accepted/manual FMC CG or change the trim tables.
+
 For 0.5.1, first confirm old and corrected -600/-700 labels load without a
 station/tank name warning. Fully reload after changing an ACF; metadata is
 cached per aircraft load. Compare unchanged loading with label-only changes:
@@ -33,7 +43,7 @@ Capture for every case:
 Run the following with `737_60NG.acf`/ID 3, `737_70NG.acf`/ID 2, `737_80NG.acf`/ID 0,
 `737_90NG.acf`/ID 1 and `737_9ENG.acf`/ID 4:
 
-1. Confirm all five layouts pass the v0.5.1 installer. Record loaded numeric
+1. Confirm all five layouts pass the v0.5.2 installer. Record loaded numeric
    DataRefs and ACF metadata; the previous exact numeric gates no longer apply.
 2. Empty/internal: verify no unexplained 524-kg addition. EFB current CG must
    equal X-Plane `cg_offset_z_mac` within 0.5 percentage points; populated CG
