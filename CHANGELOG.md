@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.3 - 2026-09-07
+
+- Tablet and FMS activate only for a complete compatible loaded ACF. Old or
+  incomplete ACFs delegate silently to upstream functions without CG writes.
+- Both XLua states use the same pure ACF predicate; FMS resets its cache at
+  flight_start. No Toolkit ACF-specific validation feature is required.
+- Standalone installer retains pre-install validation and migrates/removes
+  the additional FMS lifecycle hook. Runtime geometry remains dynamic.
+- Make retained Tablet/FMS anchors unambiguous for the Toolkit exact-text
+  handler; preserve standalone migration, idempotence and uninstall parity.
+- Validation and remaining simulator checks: `VALIDATION_0.5.3.md`.
+
 ## 0.5.2 - 2026-09-06
 
 - Fix native station CG-relative metres being treated as absolute arms.

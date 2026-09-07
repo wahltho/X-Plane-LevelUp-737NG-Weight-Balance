@@ -31,7 +31,7 @@ local function finite(value)
 end
 M.finite = finite
 
--- Only metadata not exposed as a usable global DataRef is read from disk.
+-- The ACF establishes compatibility; live DataRefs still own numeric geometry.
 -- Parse once per aircraft load/path/variant, never in the per-frame loop.
 function M.read_metadata(path, policy)
     local file = io.open(path, "r")
@@ -73,7 +73,67 @@ function M.read_metadata(path, policy)
     if not finite(mac) or mac <= 0 or not finite(fwd) or not finite(aft) or fwd >= aft then
         return nil, "invalid MAC or fixed CG limits"
     end
+    -- FIX: require usable W&B fields before either Tablet or FMS takes ownership.
+    -- Names alone must not activate a partly converted or incomplete aircraft.
+    local function number(key, positive)
+        local value = tonumber(fields["acf/" .. key])
+        if not finite(value) or (positive and value <= 0) then return nil end
+        return value
+    end
+    local empty, maximum = number("_m_empty", true), number("_m_max", true)
+    if not empty or not maximum or maximum <= empty or
+        not number("_cgZ") or not number("_m_fuel_max_tot", true) then
+        return nil, "invalid ACF mass/reference"
+    end
+    for i = 0, 8 do
+        if not number("_fixed_ref/" .. i .. ",2") or not number("_fixed_max/" .. i, true) then
+            return nil, "invalid ACF station at index " .. i
+        end
+    end
+    local ratios, total = {}, 0
+    for i = 0, 8 do
+        local ratio = number("_tank_rat/" .. i)
+        if not ratio or (i < 3 and ratio <= 0) or (i >= 3 and ratio ~= 0) then
+            return nil, "unsupported ACF tank capacity at index " .. i
+        end
+        ratios[i], total = ratio, total + ratio
+        if i < 3 and (not number("_tank_xyz/" .. i .. ",2") or
+            not number("_tank_xyz_full/" .. i .. ",2")) then
+            return nil, "invalid ACF tank endpoints at index " .. i
+        end
+    end
+    if math.abs(total - 1) > 0.000001 or math.abs(ratios[0] - ratios[2]) > 0.00000001 then
+        return nil, "unsupported ACF fuel capacity ratios"
+    end
     return { mac_m = mac * 0.3048, cg_fwd_z_m = fwd * 0.3048, cg_aft_z_m = aft * 0.3048 }
+end
+
+-- FIX: independent module caches use the same predicate, never callback-order flags.
+function M.new_aircraft_reader()
+    local key, metadata, reason
+    local reader = {}
+    function reader.reset()
+        key, metadata, reason = nil, nil, nil
+    end
+    function reader.read(variant, root, loaded)
+        local policy = M[variant]
+        root = (root or ""):gsub("%z.*", ""):gsub("\\", "/")
+        loaded = (loaded or ""):gsub("%z.*", ""):gsub("\\", "/")
+        if not policy or root == "" or loaded:match("([^/]+)$") ~= policy.acf_name then
+            reader.reset()
+            return nil
+        end
+        local current = tostring(variant) .. "|" .. root .. "|" .. loaded
+        if current ~= key then
+            key = current
+            local ok, result, error = pcall(M.read_metadata,
+                root:gsub("/+$", "") .. "/" .. policy.acf_name, policy)
+            if ok then metadata, reason = result, error
+            else metadata, reason = nil, "ACF metadata read failed" end
+        end
+        return metadata, reason
+    end
+    return reader
 end
 
 -- A complete immutable-for-the-frame snapshot. Runtime masses are kg,

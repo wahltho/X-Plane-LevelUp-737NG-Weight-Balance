@@ -26,7 +26,7 @@ PACKAGE_ID = "levelup-737ng-weight-balance-test-balloon"
 
 # Numeric geometry belongs to the loaded aircraft. This schema-1 contract
 # retains only the supported station/tank layout for both install paths.
-ACF_CONTRACT_PATH = Path(__file__).resolve().parent / "contracts/levelup-ng-wb-acf-v0.5.2.json"
+ACF_CONTRACT_PATH = Path(__file__).resolve().parent / "contracts/levelup-ng-wb-acf-v0.5.3.json"
 ACF_CONTRACTS = tuple(json.loads(ACF_CONTRACT_PATH.read_text(encoding="utf-8"))["variants"])
 
 PAYLOADS = (
@@ -41,6 +41,7 @@ FRAGMENTS = (
     Path("Replace_internal_payload_gate.txt"),
     Path("Replace_total_payload_scalar_gate.txt"),
     Path("Add_levelup_ng_wb_fms_empty_weight.txt"),
+    Path("Add_levelup_ng_wb_fms_reset.txt"),
     Path("Replace_levelup_ng_wb_fms_zfw_owner.txt"),
 )
 
@@ -62,6 +63,9 @@ FMS_ZFW_END = "-- END LEVELUP_NG_WB FMS_ZFW_OWNER"
 FMS_EMPTY_STOCK = [
     'simDR_payload_stations\t\t= find_dataref("sim/flightmodel/weight/m_stations")',
 ]
+FMS_RESET_BEGIN = "-- BEGIN LEVELUP_NG_WB FMS_ACF_RESET"
+FMS_RESET_END = "-- END LEVELUP_NG_WB FMS_ACF_RESET"
+
 FMS_ZFW_STOCK = [
     "\tzfw_real = B738DR_oew_kg + simDR_payload_weight - full_crew_weight",
 ]
@@ -138,7 +142,7 @@ def verify_package() -> str:
         raise SystemExit(2)
 
     required = (*PAYLOADS, *FRAGMENTS, Path("z_Install_LevelUp_NG_WB.py"),
-                Path("contracts/levelup-ng-wb-acf-v0.5.2.json"))
+                Path("contracts/levelup-ng-wb-acf-v0.5.3.json"))
     for path in required:
         require(path)
         expected = payloads.get(path.as_posix())
@@ -415,19 +419,46 @@ def patch_tablet(lines: list[str], uninstall: bool, fragments: dict[str, list[st
             lines, TOTAL_BEGIN, TOTAL_END, fragments[TOTAL_BEGIN],
             ["\t\t\t\tsimDR_payload_weight = full_crew_weight"],
         )
+    old_anchor = '-- -- dofile("")'
+    new_anchor = "-- LevelUp W&B post-definition anchor"
+    for index, line in enumerate(lines):
+        if line == (new_anchor if uninstall else old_anchor):
+            lines[index] = old_anchor if uninstall else new_anchor
+            changed = True
     return changed
 
 
 def patch_fms(lines: list[str], uninstall: bool, fragments: dict[str, list[str]]) -> bool:
     changed = False
     if uninstall:
+        changed |= remove_block(lines, FMS_RESET_BEGIN, FMS_RESET_END)
+        for index, line in enumerate(lines):
+            if line == "function flight_start() -- LevelUp W&B compatibility lifecycle":
+                lines[index] = "function flight_start()"
+                changed = True
         changed |= remove_block(lines, FMS_EMPTY_BEGIN, FMS_EMPTY_END)
+        for index, line in enumerate(lines):
+            if line == FMS_EMPTY_STOCK[0] + " -- LevelUp W&B binding anchor":
+                lines[index] = FMS_EMPTY_STOCK[0]
+                changed = True
         changed |= remove_block(lines, FMS_ZFW_BEGIN, FMS_ZFW_END, FMS_ZFW_STOCK)
     else:
+        changed |= install_insert(
+            lines, FMS_RESET_BEGIN, FMS_RESET_END, fragments[FMS_RESET_BEGIN],
+            "function flight_start()", False,
+        )
+        for index, line in enumerate(lines):
+            if line == "function flight_start()":
+                lines[index] = "function flight_start() -- LevelUp W&B compatibility lifecycle"
+                changed = True
         changed |= install_insert(
             lines, FMS_EMPTY_BEGIN, FMS_EMPTY_END, fragments[FMS_EMPTY_BEGIN],
             FMS_EMPTY_STOCK[0], False,
         )
+        for index, line in enumerate(lines):
+            if line == FMS_EMPTY_STOCK[0]:
+                lines[index] += " -- LevelUp W&B binding anchor"
+                changed = True
         changed |= install_replacement(
             lines, FMS_ZFW_BEGIN, FMS_ZFW_END, fragments[FMS_ZFW_BEGIN], FMS_ZFW_STOCK,
         )
@@ -459,6 +490,7 @@ def main() -> int:
         EXTERNAL_BEGIN: read_fragment(Path("Replace_external_payload_gate.txt")),
         INTERNAL_BEGIN: read_fragment(Path("Replace_internal_payload_gate.txt")),
         TOTAL_BEGIN: read_fragment(Path("Replace_total_payload_scalar_gate.txt")),
+        FMS_RESET_BEGIN: read_fragment(Path("Add_levelup_ng_wb_fms_reset.txt")),
         FMS_EMPTY_BEGIN: read_fragment(Path("Add_levelup_ng_wb_fms_empty_weight.txt")),
         FMS_ZFW_BEGIN: read_fragment(Path("Replace_levelup_ng_wb_fms_zfw_owner.txt")),
     }

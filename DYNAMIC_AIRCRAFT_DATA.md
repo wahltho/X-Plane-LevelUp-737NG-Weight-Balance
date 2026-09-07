@@ -1,5 +1,15 @@
 # Loaded-aircraft W&B contract — 0.5.x source
 
+Version 0.5.3 adds a shared per-load ACF compatibility predicate in Tablet and
+FMS. Old/missing/incompatible ACF metadata delegates silently to upstream, with
+no W&B CG clearing or payload ownership. A compatible ACF still retains the
+existing safety inhibition if live numeric inputs subsequently become invalid.
+Both module caches reset on flight_start; path/variant changes are re-evaluated.
+The FMS now has three marked blocks. No Toolkit application ACF gate is needed.
+Latest automated evidence: `VALIDATION_0.5.3.md`; simulator acceptance is pending.
+
+
+
 Version 0.5.2 corrects the native station datum using the 2026-09-06 DRT capture.
 No aircraft deploy or simulator-runtime test. See `VALIDATION_0.5.2.md`.
 

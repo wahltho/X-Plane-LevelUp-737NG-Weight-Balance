@@ -162,11 +162,24 @@ io.open = function(path, mode)
         ["_fixed_role/count"] = 9, ["_tank_name/count"] = 9,
         ["_tank_rat/count"] = 9, ["_tank_xyz/i_count"] = 9, ["_tank_xyz/j_count"] = 3,
         ["_tank_xyz_full/i_count"] = 9, ["_tank_xyz_full/j_count"] = 3,
+        ["_m_empty"] = data.empty_mass_kg / LB_TO_KG,
+        ["_m_max"] = data.max_gross_mass_kg / LB_TO_KG,
+        ["_cgZ"] = data.empty_cg_z_m / FT_TO_M,
+        ["_m_fuel_max_tot"] = literal[B738DR_b737_variant].fuel_total,
         ["_average_mac_acf"] = data.mac_m / FT_TO_M,
         ["_cgZ_fwd"] = data.cg_fwd_z_m / FT_TO_M,
         ["_cgZ_aft"] = data.cg_aft_z_m / FT_TO_M,
     }
-    for i = 0, 8 do fields["_fixed_name/" .. i] = data.stations[i + 1].name end
+    for i = 0, 8 do
+        fields["_fixed_name/" .. i] = data.stations[i + 1].name
+        fields["_fixed_ref/" .. i .. ",2"] = data.stations[i + 1].arm_m / FT_TO_M
+        fields["_fixed_max/" .. i] = data.stations[i + 1].max_kg / LB_TO_KG
+        fields["_tank_rat/" .. i] = i < 3 and ({0.187000006, 0.625999987, 0.187000006})[i + 1] or 0
+        if i < 3 then
+            fields["_tank_xyz/" .. i .. ",2"] = data.tanks[i + 1].empty_arm_m / FT_TO_M
+            fields["_tank_xyz_full/" .. i .. ",2"] = data.tanks[i + 1].full_arm_m / FT_TO_M
+        end
+    end
     fields["_tank_name/0"] = "Left Main"
     fields["_tank_name/1"] = "Center Wing"
     fields["_tank_name/2"] = B738DR_b737_variant == 3 and "Right Wing" or "Right Main"
@@ -449,10 +462,42 @@ for _, variant in ipairs({3, 2}) do
     assert(handoff == B738DR_calc_to_cg, "label-only FMC handoff invariance")
     for i = 0, 8 do assert(simDR_payload_stations[i] == 0, "external reload is read-only") end
 end
+-- New oracle: incompatible loaded ACFs preserve upstream producers and calls.
+local real_print = print
+local warnings = 0
+print = function() warnings = warnings + 1 end
+for _, variant in ipairs({3, 2, 0, 1, 4}) do
+    B738DR_b737_variant = variant
+    establish_xplane_reference(variant, empty_stations)
+    for _, change in ipairs({
+        { ["_fixed_name/0"] = "Pax Fwd" },
+        { ["_fixed_max/8"] = 0 },
+        { ["_fixed_ref/7,2"] = "missing" },
+    }) do
+        metadata_changes = change
+        B738DR_calc_to_cg = 23
+        local before_calls, before_oew = stock_calls, B738DR_oew_kg
+        flight_start()
+        after_physics()
+        update_payload()
+        total_payload_entry("123")
+        B738CMD_change_payload:once()
+        assert(not adapter.owns_payload())
+        assert(stock_calls == before_calls + 1111, "all upstream loading callbacks delegate")
+        assert(calc_zfw_mac() == 32 and check_tow(1, 1) == "stock_tow")
+        assert(B738DR_calc_to_cg == 23 and B738DR_oew_kg == before_oew)
+        for i = 0, 8 do assert(simDR_payload_stations[i] == 0) end
+    end
+    metadata_changes = {}
+    flight_start()
+    assert(adapter.owns_payload(), "valid same-ID reload recovers")
+end
+assert(warnings == 0, "incompatible ACFs must be silent")
+print = real_print
 io.open = real_open
 
 B738DR_calc_to_cg = 22
 B738DR_b737_variant = 6
 assert(check_tow(1, 1) == "stock_tow", "variant switch must relinquish envelope ownership")
-assert(B738DR_calc_to_cg == 0, "variant retirement must not retain our previous handoff")
+assert(B738DR_calc_to_cg == 22, "inactive variant must not write the upstream handoff")
 print("PASS: -600/-700/-800/-900/-900ER owners, ACF tank arms, exact cargo limits, external read-only and delegation")

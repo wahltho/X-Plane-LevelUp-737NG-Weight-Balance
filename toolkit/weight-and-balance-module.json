@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "manifestType": "levelup-compatibility-module-source",
   "moduleId": "weight-and-balance",
-  "moduleVersion": "0.5.2",
+  "moduleVersion": "0.5.3",
   "displayName": "LevelUp 737NG Weight and Balance",
   "description": "Loaded-aircraft W&B geometry, X-Plane station ownership, current/predicted CG and existing FMC handoffs.",
   "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
@@ -53,18 +53,18 @@
     },
     {
       "path": "patches/B738.tablet.lua.json",
-      "size": 1803,
-      "sha256": "879d91cc363750db966267ec391184c0c02fd18443c59d6e9277c0280f27316f"
+      "size": 1855,
+      "sha256": "ea5ff2a9f96786f2130b6f918d669c0ca83b13ae3bf58edde31937b7b3aa886d"
     },
     {
       "path": "patches/B738.a_fms.lua.json",
-      "size": 1729,
-      "sha256": "77fb7d7e6eb3c4d2c70bfd76312b517c12196c63945e5f33378c609153cd4d8f"
+      "size": 2426,
+      "sha256": "7c4d4cfb041e00ab68c44746427a03dcf8f038f24d3009b67441e4c917aa842a"
     },
     {
       "path": "B738.tablet_levelup_ng_wb_data.lua",
-      "size": 6289,
-      "sha256": "eb7883777a24c5d3a7c4aab9d6008911cd85c9e2d66758e588a7b8bda07f75e7"
+      "size": 8874,
+      "sha256": "fcdc6c1df2433e874e0ecfb762ccb37ef3fcdf54e72d8ddb93908e7e2b4e4f18"
     },
     {
       "path": "B738.tablet_levelup_ng_wb_core.lua",
@@ -73,13 +73,13 @@
     },
     {
       "path": "B738.tablet_levelup_ng_wb_adapter.lua",
-      "size": 13844,
-      "sha256": "94a715e34e9133b01ad373e21d9d6e598c0a6661125c482405f27fda47b38e82"
+      "size": 13900,
+      "sha256": "9165529033e773f85efcb450d337870958c0327e8ade193f9364540b54defdbd"
     },
     {
-      "path": "contracts/levelup-ng-wb-acf-v0.5.2.json",
-      "size": 6556,
-      "sha256": "72f0174ac3dafa7cf47019461622134e7d7025b08f188f78a1a33cdc8f9ed5d7"
+      "path": "contracts/levelup-ng-wb-acf-v0.5.3.json",
+      "size": 6596,
+      "sha256": "e04219de4a084933e9c6d1a705816cae97588c8e0a6bfac96975e0a93d8be589"
     }
   ],
   "targets": [
@@ -102,7 +102,7 @@
       "operation": "copy-file-v1",
       "payload": "B738.tablet_levelup_ng_wb_data.lua",
       "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
-      "resultSha256": "eb7883777a24c5d3a7c4aab9d6008911cd85c9e2d66758e588a7b8bda07f75e7"
+      "resultSha256": "fcdc6c1df2433e874e0ecfb762ccb37ef3fcdf54e72d8ddb93908e7e2b4e4f18"
     },
     {
       "operation": "copy-file-v1",
@@ -114,18 +114,18 @@
       "operation": "copy-file-v1",
       "payload": "B738.tablet_levelup_ng_wb_adapter.lua",
       "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_adapter.lua",
-      "resultSha256": "94a715e34e9133b01ad373e21d9d6e598c0a6661125c482405f27fda47b38e82"
+      "resultSha256": "9165529033e773f85efcb450d337870958c0327e8ade193f9364540b54defdbd"
     }
   ],
   "acfContract": {
-    "path": "contracts/levelup-ng-wb-acf-v0.5.2.json",
-    "size": 6556,
-    "sha256": "72f0174ac3dafa7cf47019461622134e7d7025b08f188f78a1a33cdc8f9ed5d7"
+    "path": "contracts/levelup-ng-wb-acf-v0.5.3.json",
+    "size": 6596,
+    "sha256": "e04219de4a084933e9c6d1a705816cae97588c8e0a6bfac96975e0a93d8be589"
   },
   "toolkitIntegration": {
     "transactionModel": "LevelUp compatibility package schema 3",
     "directCatalogEntry": false,
     "reason": "This repository is the canonical module source. End users receive it through the consolidated LevelUp compatibility package.",
-    "openRequirement": "Validate the schema-1 station/tank layout before enabling. Canonical names are in text; optional textAlternatives lists exact legacy names by field and variant. Canonical-only validators accept corrected ACFs; supporting old names requires those alternatives. Runtime performs full numeric sanity and symmetric-tank validation; numeric geometry is not pinned."
+    "openRequirement": "No Toolkit ACF-specific gate required: Tablet and FMS independently use the same bundled per-load ACF predicate and delegate silently for incompatible aircraft. The standalone Python installer retains its pre-install ACF checks."
   }
 }

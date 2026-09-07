@@ -1,0 +1,3 @@
+	-- BEGIN LEVELUP_NG_WB FMS_ACF_RESET
+	levelup_ng_wb_aircraft.reset()
+	-- END LEVELUP_NG_WB FMS_ACF_RESET

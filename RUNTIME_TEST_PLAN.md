@@ -1,5 +1,19 @@
 # Later simulator test matrix
 
+## 0.5.3 activation hardening — simulator acceptance pending
+
+With identical patched Lua, load each old V2.S1.50 aircraft and then each new
+nine-station aircraft. Old/missing/incompatible ACF metadata must cause no W&B
+warning, payload write, CG zeroing or substituted EFB/FMS calculation. Compare
+with untouched upstream behavior in the same state. Verify internal/external
+mode and both FMS/Tablet callback orders. Repeat valid-to-old and old-to-valid
+transitions, same-ID reload, different aircraft paths, and missing-file recovery
+on reload. The new FMS helper is loaded relative to its script folder; verify
+stock XLua loading on Windows and macOS. Test valid ACF with later invalid live
+numeric DataRefs separately: existing station/forecast safety inhibition remains.
+Run only with explicit test/runtime approval.
+
+
 Run only after explicit deploy/runtime approval and after preserving the exact
 baseline aircraft and Lua files.
 

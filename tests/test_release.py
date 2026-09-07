@@ -20,7 +20,7 @@ parser.add_argument("--lua51-syntax", action="store_true")
 args = parser.parse_args()
 # Independent frozen author inputs; the new installer has no numeric geometry.
 FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.2.zip"
+ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.3.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -40,6 +40,7 @@ EXPECTED = {
     "Replace_internal_payload_gate.txt",
     "Replace_total_payload_scalar_gate.txt",
     "Add_levelup_ng_wb_fms_empty_weight.txt",
+    "Add_levelup_ng_wb_fms_reset.txt",
     "Replace_levelup_ng_wb_fms_zfw_owner.txt",
     "z_Install_LevelUp_NG_WB.py",
     "levelup-ng-wb-package-manifest.txt",
@@ -49,8 +50,8 @@ EXPECTED = {
     "OWNER_CLOSURE.md",
     "RUNTIME_TEST_PLAN.md",
     "DYNAMIC_AIRCRAFT_DATA.md",
-    "VALIDATION_0.5.2.md",
-    "RELEASE_NOTES_0.5.2.md",
+    "VALIDATION_0.5.3.md",
+    "RELEASE_NOTES_0.5.3.md",
     "ACF_RECONCILE_2026_08_22.md",
     "ACF_RECONCILE_2026_08_23.md",
     "ACF_RECONCILE_2026_08_25.md",
@@ -60,7 +61,7 @@ EXPECTED = {
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",
     "patches/B738.a_fms.lua.json",
-    "contracts/levelup-ng-wb-acf-v0.5.2.json",
+    "contracts/levelup-ng-wb-acf-v0.5.3.json",
     "toolkit/weight-and-balance-module.json",
 }
 
@@ -131,4 +132,4 @@ with zipfile.ZipFile(ARCHIVE) as archive:
                 LuaRuntime().execute("assert(loadfile(...))", str(path))
                 print("PASS packaged Lua 5.1 syntax: " + path.name)
 
-print("PASS: v0.5.2 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")
+print("PASS: v0.5.3 entries, checksum, source identity and fresh five-contract Tablet/FMS installation")

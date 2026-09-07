@@ -24,9 +24,7 @@ simDR_levelup_ng_tank_full = find_dataref("sim/aircraft/overflow/acf_tank_Z_full
 simDR_levelup_ng_tank_rat = find_dataref("sim/aircraft/overflow/acf_tank_rat")
 
 function M.reset_aircraft()
-    -- Retire our last handoff on a supported -> unsupported transition too;
-    -- do not clear a continuously stock-owned aircraft's publication.
-    if aircraft_key ~= nil or contracts[B738DR_b737_variant] then B738DR_calc_to_cg = 0 end
+    -- FIX: resetting the compatibility cache must not write stock-owned CG.
     aircraft_key, metadata, frame_data, geometry_error = nil, nil, nil, nil
     cached_lemac_z_m, warned_station, warned_geometry = nil, nil, nil
 end
@@ -66,6 +64,10 @@ local function read_aircraft(refresh)
             if ok then frame_data, geometry_error = result, reason
             else geometry_error = "aircraft DataRefs unavailable: " .. tostring(result) end
         end
+    end
+    if not metadata then
+        -- Old/incomplete ACF: no W&B writes, warnings or replacement calculations.
+        return nil
     end
     if not frame_data then
         B738DR_calc_to_cg = 0
@@ -195,8 +197,9 @@ local function validate_or_warn(data, stations)
 end
 
 function M.owns_payload()
-    -- An invalid supported aircraft must NOT fall back to stock scalar writers.
-    return contracts[B738DR_b737_variant] ~= nil
+    -- FIX: variant identity alone does not establish the nine-station contract.
+    read_aircraft(false)
+    return metadata ~= nil
 end
 
 function M.data_for_variant(variant_id)
@@ -363,6 +366,8 @@ function M.install()
     end
     flight_start = function()
         M.reset_aircraft()
+        read_aircraft(false)
+        if metadata then B738DR_calc_to_cg = 0 end
         if original.flight_start then original.flight_start() end
     end
 end

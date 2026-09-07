@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[1]
 MODULE_MANIFEST = REPOSITORY / "toolkit/weight-and-balance-module.json"
-ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.5.2.json"
+ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.5.3.json"
 TABLET_LOADER_PATCH = REPOSITORY / "patches/B738.tablet.loader.json"
 TABLET_PATCH = REPOSITORY / "patches/B738.tablet.lua.json"
 FMS_PATCH = REPOSITORY / "patches/B738.a_fms.lua.json"
@@ -33,12 +33,17 @@ def apply_exact_replacements(source: str, payload: dict[str, object]) -> str:
     for replacement in payload["replacements"]:
         old = replacement["oldLines"]
         new = replacement["newLines"]
+        assert not any(new[i:i + len(old)] == old for i in range(len(new) - len(old) + 1)), replacement["name"]
         matches = [
             index
             for index in range(len(lines) - len(old) + 1)
             if lines[index:index + len(old)] == old
         ]
-        assert len(matches) == 1, (replacement["name"], matches)
+        installed = [i for i in range(len(lines) - len(new) + 1)
+                     if lines[i:i + len(new)] == new]
+        if not matches and len(installed) == 1:
+            continue
+        assert len(matches) == 1 and not installed, (replacement["name"], matches, installed)
         index = matches[0]
         lines[index:index + len(old)] = new
     return "\n".join(lines) + "\n"
@@ -71,7 +76,7 @@ manifest = json.loads(MODULE_MANIFEST.read_text(encoding="utf-8"))
 assert manifest["schemaVersion"] == 1
 assert manifest["manifestType"] == "levelup-compatibility-module-source"
 assert manifest["moduleId"] == "weight-and-balance"
-assert manifest["moduleVersion"] == "0.5.2"
+assert manifest["moduleVersion"] == "0.5.3"
 assert manifest["toolkitIntegration"]["directCatalogEntry"] is False
 assert [entry["variantId"] for entry in manifest["supportedVariants"]] == [3, 2, 0, 1, 4]
 
@@ -96,6 +101,7 @@ patched = apply_exact_replacements(
     apply_marked_insertion(BASELINE.read_text(encoding="utf-8"), loader_patch),
     patch,
 )
+assert apply_exact_replacements(patched, patch) == patched
 assert patched.count("BEGIN LEVELUP_NG_WB") == 5
 assert patched.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
 assert patched.index("BEGIN LEVELUP_NG_WB INSTALL") > patched.index("function after_physics()")
@@ -117,14 +123,15 @@ assert combined.count("BEGIN LEVELUP_NG_WB DOFILE") == 1
 
 fms_patch = json.loads(FMS_PATCH.read_text(encoding="utf-8"))
 assert fms_patch["format"] == "exact-text-replacements-v1"
-assert len(fms_patch["replacements"]) == 2
+assert len(fms_patch["replacements"]) == 3
 fms_patched = apply_exact_replacements(FMS_BASELINE.read_text(encoding="utf-8"), fms_patch)
+assert apply_exact_replacements(fms_patched, fms_patch) == fms_patched
 assert fms_patched.count("BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
 assert fms_patched.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
 assert "for station_index = 0, 8 do" in fms_patched
 assert "zfw_real = simDR_levelup_ng_acf_m_empty + station_payload_weight" in fms_patched
-assert "B738DR_b737_variant == 4" in fms_patched
-assert "B738DR_b737_variant == 3" in fms_patched
+assert "levelup_ng_wb_aircraft.read(B738DR_b737_variant, file_path2, simDR_levelup_ng_wb_acf_path)" in fms_patched
+assert fms_patched.count("BEGIN LEVELUP_NG_WB FMS_ACF_RESET") == 1
 
 spec = importlib.util.spec_from_file_location("levelup_ng_wb_installer", INSTALLER)
 assert spec is not None and spec.loader is not None
@@ -132,7 +139,7 @@ installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
 contract = json.loads(ACF_CONTRACT.read_text(encoding="utf-8"))
 assert contract["schemaVersion"] == 1
-assert contract["packageVersion"] == "0.5.2"
+assert contract["packageVersion"] == "0.5.3"
 json_contracts = {entry["name"]: entry for entry in contract["variants"]}
 installer_contracts = {entry["name"]: entry for entry in installer.ACF_CONTRACTS}
 assert set(json_contracts) == set(installer_contracts)
@@ -147,5 +154,9 @@ assert json_contracts["737_60NG.acf"]["textAlternatives"] == {"acf/_tank_name/2"
 assert json_contracts["737_70NG.acf"]["textAlternatives"] == {"acf/_fixed_name/8": ["Galley R"]}
 assert json_contracts["737_60NG.acf"]["text"]["acf/_tank_name/2"] == "Right Main"
 assert json_contracts["737_70NG.acf"]["text"]["acf/_fixed_name/8"] == "Galley A"
+
+from lupa.lua51 import LuaRuntime
+for source in (patched, combined, fms_patched):
+    LuaRuntime().execute("assert(loadstring(...))", source)
 
 print("PASS: Toolkit module payloads, structural Tablet/FMS patches and semantic ACF contract")

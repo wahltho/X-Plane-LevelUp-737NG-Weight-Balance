@@ -1,7 +1,7 @@
 # Installation guide
 
-Version **0.5.2**. Automated regression and packaged-installation checks pass;
-in-simulator acceptance remains pending. See `VALIDATION_0.5.2.md`.
+Version **0.5.3**. Automated regression and packaged-installation checks pass;
+in-simulator acceptance remains pending. See `VALIDATION_0.5.3.md`.
 
 ## Requirements
 
@@ -25,7 +25,7 @@ of its Galley F/A roles are both accepted.
 2. Back up the LevelUp test aircraft.
 3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
 4. Extract every file from
-   `LevelUp-737NG-Weight-Balance-v0.5.2.zip` directly into that folder. Do not
+   `LevelUp-737NG-Weight-Balance-v0.5.3.zip` directly into that folder. Do not
    create another subfolder.
 5. Run one of:
 
@@ -37,17 +37,17 @@ of its Galley F/A roles are both accepted.
 
 The installer must report:
 
-- package payload `v0.5.2` verified;
+- package payload `v0.5.3` verified;
 - all five ACF contracts verified;
 - Lua syntax passed when a Lua 5.1-compatible `luac` is available, or skipped
   with an informational message for incompatible system compilers;
 - LevelUp 737NG W&B hooks installed.
 
-When upgrading from 0.5.0 or 0.5.1, `hooks are already in the requested state` is also
-success: the hooks did not change. The extracted data module and verified
-0.5.2 payload provide the coordinate fix and retained name aliases. Restart
-X-Plane afterwards. Running only the old installer without extracting the
-complete new ZIP does not update the runtime data module.
+When upgrading from 0.5.0, 0.5.1 or 0.5.2, extract the complete 0.5.3 ZIP
+and run the installer. The FMS blocks now include the shared ACF predicate and
+a flight_start cache reset. Tablet hook positions remain unchanged. A subsequent
+run reports `hooks are already in the requested state`. Restart X-Plane.
+Running an old installer alone does not update the runtime modules.
 
 For an aircraft root outside the normal four-parent layout, use:
 
@@ -62,9 +62,9 @@ from the -700-only v0.1.x package keeps
 marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
 required after installing or upgrading.
 
-For an existing v0.2.0 through v0.4.2 installation, extract v0.5.2 over
+For an existing v0.2.0 through v0.4.2 installation, extract v0.5.3 over
 the same Tablet folder and run the installer normally. Do not uninstall first.
-The five common Tablet hooks are unchanged. The installer adds two marked
+The five common Tablet hooks are unchanged. The installer adds three marked
 blocks to the sibling `B738.a_fms/B738.a_fms.lua` and verifies all five current
 ACF contracts. Existing marked VNAV descent-table and Tablet performance
 patches are preserved.
@@ -81,7 +81,7 @@ malformed W&B layout/value rather than guessing a source edit.
 
 ## Capacity boundary
 
-The figures below describe historical author ACFs; in 0.5.2 the loaded
+The figures below describe historical author ACFs; in 0.5.3 the loaded
 DataRef maxima determine actual boundaries, including after author updates.
 
 The ACF station maxima are authoritative. Rounded stock Tablet cargo values
@@ -106,7 +106,7 @@ Close X-Plane and run from the same Tablet folder:
 python3 z_Install_LevelUp_NG_WB.py --uninstall
 ```
 
-This removes only the five common Tablet W&B blocks and the two FMS W&B blocks,
+This removes only the five common Tablet W&B blocks and the three FMS W&B blocks,
 then restores the stock payload gates and stock FMS ZFW formula. It preserves
 other compatibility patches and all backup files. Package files can then be
 deleted manually.

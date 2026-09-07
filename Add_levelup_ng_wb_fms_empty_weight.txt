@@ -1,3 +1,7 @@
 -- BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT
 simDR_levelup_ng_acf_m_empty	= find_dataref("sim/aircraft/weight/acf_m_empty")
+-- FIX: load the same pure ACF predicate in the FMS XLua state.
+dofile("../B738.tablet/B738.tablet_levelup_ng_wb_data.lua")
+local levelup_ng_wb_aircraft = B738_levelup_ng_wb_data.new_aircraft_reader()
+simDR_levelup_ng_wb_acf_path = find_dataref("sim/aircraft/view/acf_relative_path")
 -- END LEVELUP_NG_WB FMS_EMPTY_WEIGHT
