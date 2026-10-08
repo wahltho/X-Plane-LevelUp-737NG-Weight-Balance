@@ -36,5 +36,5 @@ payload|file|patches/B738.a_fms.lua.json|size|2426|sha256|7c4d4cfb041e00ab68c447
 payload|file|contracts/levelup-ng-wb-acf-v0.5.3.json|size|6596|sha256|e04219de4a084933e9c6d1a705816cae97588c8e0a6bfac96975e0a93d8be589
 payload|file|toolkit/weight-and-balance-module.json|size|4499|sha256|453192c0f00567cf0d84d7dbb27d97612f08b43f6477a015f25682a565c62833
 payload|file|Add_levelup_ng_wb_fms_reset.txt|size|106|sha256|782ae06cb25761a84ee25d152250f5d6adb461e5c0b19d55f81bd810a8605505
-payload|ownership_guard|standalone_guard.py|size|32804|sha256|8bfc0ea2120a3c9d6f6f8e806efd48bbafc693ee8df6731d2e626ecbfb9b2003
+payload|ownership_guard|standalone_guard.py|size|32820|sha256|f93f6c5d6768e394bbb1b6b4e838a74af9f1630473ef4eb71a9b385c54c00e2c
 payload|ownership_policy|standalone-ownership.json|size|4678|sha256|8fa7160921a014cab923d2b87de59f706e8be6d5cfb27a4e9cdfb86604b29311
