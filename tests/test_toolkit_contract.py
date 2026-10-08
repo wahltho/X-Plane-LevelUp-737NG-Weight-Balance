@@ -5,9 +5,11 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 
 REPOSITORY = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(REPOSITORY))
 MODULE_MANIFEST = REPOSITORY / "toolkit/weight-and-balance-module.json"
 ACF_CONTRACT = REPOSITORY / "contracts/levelup-ng-wb-acf-v0.5.3.json"
 TABLET_LOADER_PATCH = REPOSITORY / "patches/B738.tablet.loader.json"

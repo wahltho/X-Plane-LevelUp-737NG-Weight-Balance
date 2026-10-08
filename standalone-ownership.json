@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "packageId": "wahltho.levelup-737ng.weight-and-balance",
+    "displayName": "Weight & Balance",
+    "repositoryUrl": "https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance",
+    "supportedProducts": [
+      "levelup-737ng"
+    ],
+    "moduleIds": [
+      "weight-and-balance"
+    ],
+    "targetPaths": [
+      "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_700_wb_*",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_*",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_adapter.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_core.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup700_wb_*"
+    ],
+    "standaloneEvidencePaths": [
+      ".patch-ownership/wahltho.levelup-737ng.weight-and-balance/receipt.json",
+      ".patch-ownership/wahltho.levelup-737ng.weight-and-balance.lock",
+      ".patch-ownership/wahltho.levelup-737ng.weight-and-balance/transaction"
+    ],
+    "payloadPaths": [
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_700_wb_*",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_*",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_adapter.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_core.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup_ng_wb_data.lua",
+      "plugins/xlua/scripts/B738.tablet/B738.tablet_levelup700_wb_*"
+    ],
+    "markerNamespaces": [
+      {
+        "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet.lua",
+        "namespace": "LEVELUP_NG_WB",
+        "blocks": [
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB DOFILE",
+            "endMarker": "-- END LEVELUP_NG_WB DOFILE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE",
+            "endMarker": "-- END LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB INSTALL",
+            "endMarker": "-- END LEVELUP_NG_WB INSTALL"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE",
+            "endMarker": "-- END LEVELUP_NG_WB INTERNAL_PAYLOAD_GATE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE",
+            "endMarker": "-- END LEVELUP_NG_WB TOTAL_PAYLOAD_SCALAR_GATE"
+          }
+        ],
+        "allowedCommentLines": []
+      },
+      {
+        "relativePath": "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua",
+        "namespace": "LEVELUP_NG_WB",
+        "blocks": [
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB FMS_ACF_RESET",
+            "endMarker": "-- END LEVELUP_NG_WB FMS_ACF_RESET"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT",
+            "endMarker": "-- END LEVELUP_NG_WB FMS_EMPTY_WEIGHT"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER",
+            "endMarker": "-- END LEVELUP_NG_WB FMS_ZFW_OWNER"
+          }
+        ],
+        "allowedCommentLines": []
+      },
+      {
+        "relativePath": "plugins/xlua/scripts/B738.tablet/B738.tablet.lua",
+        "namespace": "LEVELUP_700_WB",
+        "blocks": [
+          {
+            "beginMarker": "-- BEGIN LEVELUP_700_WB DOFILE",
+            "endMarker": "-- END LEVELUP_700_WB DOFILE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_700_WB INSTALL",
+            "endMarker": "-- END LEVELUP_700_WB INSTALL"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_700_WB EXTERNAL_PAYLOAD_GATE",
+            "endMarker": "-- END LEVELUP_700_WB EXTERNAL_PAYLOAD_GATE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_700_WB INTERNAL_PAYLOAD_GATE",
+            "endMarker": "-- END LEVELUP_700_WB INTERNAL_PAYLOAD_GATE"
+          },
+          {
+            "beginMarker": "-- BEGIN LEVELUP_700_WB TOTAL_PAYLOAD_SCALAR_GATE",
+            "endMarker": "-- END LEVELUP_700_WB TOTAL_PAYLOAD_SCALAR_GATE"
+          }
+        ],
+        "allowedCommentLines": []
+      }
+    ],
+    "signatures": [],
+    "resultFiles": [],
+    "originalFiles": [],
+    "recoveryInstruction": "Before switching to MTK, use the restore or uninstall procedure documented by this patch, preserving other patches. Then rescan. Instructions: https://github.com/wahltho/X-Plane-LevelUp-737NG-Weight-Balance#readme."
+  }
+}

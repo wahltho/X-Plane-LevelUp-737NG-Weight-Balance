@@ -22,6 +22,8 @@ RELEASE_FILES = (
     "Add_levelup_ng_wb_fms_reset.txt",
     "Replace_levelup_ng_wb_fms_zfw_owner.txt",
     "z_Install_LevelUp_NG_WB.py",
+    "standalone_guard.py",
+    "standalone-ownership.json",
     "levelup-ng-wb-package-manifest.txt",
     "patches/B738.tablet.loader.json",
     "patches/B738.tablet.lua.json",

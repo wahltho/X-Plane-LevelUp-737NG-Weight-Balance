@@ -9,18 +9,21 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+import sys
 from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(PACKAGE))
 parser = argparse.ArgumentParser()
 parser.add_argument("--aircraft-root", type=Path)
+parser.add_argument("--archive", type=Path, help="Assembled test archive or release archive")
 parser.add_argument("--updated-aircraft-root", type=Path)
 parser.add_argument("--lua51-syntax", action="store_true")
 args = parser.parse_args()
 # Independent frozen author inputs; the new installer has no numeric geometry.
 FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
-ARCHIVE = PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.3.zip"
+ARCHIVE = args.archive or PACKAGE / "dist/LevelUp-737NG-Weight-Balance-v0.5.3.zip"
 CHECKSUM = ARCHIVE.with_suffix(ARCHIVE.suffix + ".sha256")
 BASELINE = Path(
     "/Users/wahltho/dev/Zibo Mod/Original/Zibo Mod Original/"
@@ -43,6 +46,8 @@ EXPECTED = {
     "Add_levelup_ng_wb_fms_reset.txt",
     "Replace_levelup_ng_wb_fms_zfw_owner.txt",
     "z_Install_LevelUp_NG_WB.py",
+    "standalone_guard.py",
+    "standalone-ownership.json",
     "levelup-ng-wb-package-manifest.txt",
     "README.md",
     "INSTALLATION.md",
@@ -95,12 +100,13 @@ with zipfile.ZipFile(ARCHIVE) as archive:
         assert archive.read(name) == (PACKAGE / name).read_bytes(), name
 
     with tempfile.TemporaryDirectory() as temporary:
-        aircraft = Path(temporary) / "LU 737NG Series"
+        aircraft = Path(temporary).resolve() / "LU 737NG Series"
         tablet = aircraft / "plugins/xlua/scripts/B738.tablet"
         tablet.mkdir(parents=True)
         fms = aircraft / "plugins/xlua/scripts/B738.a_fms"
         fms.mkdir(parents=True)
-        archive.extractall(tablet)
+        package = Path(temporary).resolve() / "package"
+        archive.extractall(package)
         shutil.copy2(BASELINE, tablet / "B738.tablet.lua")
         shutil.copy2(FMS_BASELINE, fms / "B738.a_fms.lua")
         for contract in installer.ACF_CONTRACTS:
@@ -112,7 +118,7 @@ with zipfile.ZipFile(ARCHIVE) as archive:
             else:
                 write_contract_acf(aircraft / str(contract["name"]), contract)
         completed = subprocess.run(
-            ["python3", "z_Install_LevelUp_NG_WB.py"], cwd=tablet,
+            [sys.executable, str(package / "z_Install_LevelUp_NG_WB.py"), "--aircraft-root", str(aircraft)], cwd=package,
             capture_output=True, text=True, check=False,
         )
         assert completed.returncode == 0, completed.stdout + completed.stderr

@@ -12,6 +12,8 @@ from pathlib import Path
 
 
 PACKAGE = Path(__file__).resolve().parents[1]
+import sys
+sys.path.insert(0, str(PACKAGE))
 # Independent frozen author inputs; the new installer has no numeric geometry.
 FIXTURES = json.loads((PACKAGE / "contracts/levelup-ng-wb-acf-v0.4.1.json").read_text())["variants"]
 BASELINE = Path(
@@ -106,9 +108,6 @@ def setup(
     aircraft = Path(temporary.name) / "LU 737NG Series"
     folder = aircraft / "plugins/xlua/scripts/B738.tablet"
     folder.mkdir(parents=True)
-    for name in FILES:
-        (folder / name).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(PACKAGE / name, folder / name)
     for contract in installer.ACF_CONTRACTS:
         write_contract_acf(aircraft / str(contract["name"]), contract)
 
@@ -141,7 +140,7 @@ def setup(
 
 def run(folder: Path, *args: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
     completed = subprocess.run(
-        ["python3", "z_Install_LevelUp_NG_WB.py", *args],
+        ["python3", str(INSTALLER), "--aircraft-root", str(folder.parents[3].resolve()), *args],
         cwd=folder, capture_output=True, text=True, check=False,
     )
     if completed.returncode != expected:
@@ -150,6 +149,27 @@ def run(folder: Path, *args: str, expected: int = 0) -> subprocess.CompletedProc
             f"stdout:\n{completed.stdout}\nstderr:\n{completed.stderr}"
         )
     return completed
+
+
+def run_legacy(folder: Path) -> subprocess.CompletedProcess[str]:
+    result = subprocess.run(["python3", "z_Install_LevelUp_NG_WB.py"], cwd=folder, capture_output=True, text=True)
+    assert result.returncode == 0, result.stdout + result.stderr
+    return result
+
+
+def original_backup(folder: Path, script: str) -> Path:
+    root = folder.parents[3]
+    state = json.loads((root / ".patch-ownership/wahltho.levelup-737ng.weight-and-balance/receipt.json").read_text())
+    relative = f"plugins/xlua/scripts/{script}/{script}.lua"
+    return root / state["files"][relative]["backupRelativePath"]
+
+
+def assert_legacy_blocked(folder: Path) -> None:
+    root = folder.parents[3]
+    before = {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+    result = run(folder, expected=1)
+    assert "owner" in result.stderr or "companion" in result.stderr or "patch" in result.stderr, result.stderr
+    assert before == {p.relative_to(root).as_posix(): p.read_bytes() for p in root.rglob("*") if p.is_file()}
 
 
 def replace_acf_field(path: Path, key: str, value: str) -> None:
@@ -253,15 +273,15 @@ def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool 
         fms_original = fms_target.read_bytes()
         acf_hashes = {path.name: digest(path) for path in folder.parents[3].glob("737_*NG.acf")}
         first = run(folder)
-        assert "Installed v0.5.3" in first.stdout
+        assert "Weight & Balance installed." in first.stdout
         assert "Verified package payload: v0.5.3" in first.stdout
         assert first.stdout.count("Verified levelup-ng-wb-layout-v1:") == 5
         for contract in installer.ACF_CONTRACTS:
             assert contract["name"] in first.stdout
         installed = target.read_bytes()
         fms_installed = fms_target.read_bytes()
-        assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == original
-        assert (fms_target.parent / "B738.a_fms.lua.levelupngwb.backup").read_bytes() == fms_original
+        assert original_backup(folder, "B738.tablet").read_bytes() == original
+        assert original_backup(folder, "B738.a_fms").read_bytes() == fms_original
         for marker in (
             b"BEGIN LEVELUP_NG_WB DOFILE", b"BEGIN LEVELUP_NG_WB INSTALL",
             b"BEGIN LEVELUP_NG_WB EXTERNAL_PAYLOAD_GATE",
@@ -304,7 +324,7 @@ def exercise(line_ending: bytes, performance_blocks: bool, descent_blocks: bool 
         run(folder, "--uninstall")
         assert target.read_bytes() == original
         assert fms_target.read_bytes() == fms_original
-        run(folder, "--uninstall")
+        run(folder, "--uninstall", expected=1)
         assert target.read_bytes() == original
         assert fms_target.read_bytes() == fms_original
     finally:
@@ -403,18 +423,7 @@ def exercise_v014_upgrade() -> None:
         backup_marker = b"original v0.1.4 backup must remain untouched\n"
         (folder / "B738.tablet.lua.levelup700wb.backup").write_bytes(backup_marker)
 
-        result = run(folder)
-        assert "Installed v0.5.3" in result.stdout
-        upgraded = target.read_text(encoding="utf-8")
-        assert "LEVELUP_700_WB" not in upgraded
-        assert upgraded.count('dofile("B738.tablet_levelup_ng_wb_adapter.lua")') == 1
-        assert upgraded.index("BEGIN LEVELUP_NG_WB INSTALL") > upgraded.index("function after_physics()")
-        assert upgraded.rstrip().endswith("-- END LEVELUP_NG_WB INSTALL")
-        assert (folder / "B738.tablet.lua.levelup700wb.backup").read_bytes() == backup_marker
-        assert not (folder / "B738.tablet.lua.levelupngwb.backup").exists()
-        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
-        assert fms.count("BEGIN LEVELUP_NG_WB FMS_EMPTY_WEIGHT") == 1
-        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        assert_legacy_blocked(folder)
     finally:
         temporary.cleanup()
 
@@ -454,7 +463,7 @@ def exercise_v020_upgrade() -> None:
 
         with zipfile.ZipFile(V020_ARCHIVE) as archive:
             archive.extractall(folder)
-        old_result = run(folder)
+        old_result = run_legacy(folder)
         assert "Installed v0.2.0" in old_result.stdout
         target = folder / "B738.tablet.lua"
         installed_v020 = target.read_bytes()
@@ -466,17 +475,7 @@ def exercise_v020_upgrade() -> None:
             (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
-        result = run(folder)
-        assert "Verified package payload: v0.5.3" in result.stdout
-        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.3" in result.stdout
-        assert target.read_bytes() == expected_tablet_anchor_comments(installed_v020)
-        assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v020
-        assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
-            PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
-        )
-        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
-        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        assert_legacy_blocked(folder)
     finally:
         temporary.cleanup()
 
@@ -521,7 +520,7 @@ def exercise_v021_upgrade() -> None:
     try:
         with zipfile.ZipFile(V021_ARCHIVE) as archive:
             archive.extractall(folder)
-        old_result = run(folder)
+        old_result = run_legacy(folder)
         assert "Installed v0.2.1" in old_result.stdout
         target = folder / "B738.tablet.lua"
         installed_v021 = target.read_bytes()
@@ -531,18 +530,7 @@ def exercise_v021_upgrade() -> None:
             (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
-        result = run(folder)
-        assert "Verified package payload: v0.5.3" in result.stdout
-        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.3" in result.stdout
-        assert target.read_bytes() == expected_tablet_anchor_comments(installed_v021)
-        assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v021
-        assert digest(folder / "B738.tablet_levelup_ng_wb_data.lua") == digest(
-            PACKAGE / "B738.tablet_levelup_ng_wb_data.lua"
-        )
-        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
-        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        assert_legacy_blocked(folder)
     finally:
         temporary.cleanup()
 
@@ -552,7 +540,7 @@ def exercise_v022_upgrade() -> None:
     try:
         with zipfile.ZipFile(V022_ARCHIVE) as archive:
             archive.extractall(folder)
-        old_result = run(folder)
+        old_result = run_legacy(folder)
         assert "Installed v0.2.2" in old_result.stdout
         target = folder / "B738.tablet.lua"
         installed_v022 = target.read_bytes()
@@ -562,15 +550,7 @@ def exercise_v022_upgrade() -> None:
             (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
 
-        result = run(folder)
-        assert "Verified package payload: v0.5.3" in result.stdout
-        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Verified levelup-ng-wb-layout-v1" in result.stdout
-        assert "Installed v0.5.3" in result.stdout
-        assert target.read_bytes() == expected_tablet_anchor_comments(installed_v022)
-        assert (folder / "B738.tablet.lua.levelupngwb.backup").read_bytes() == backup_v022
-        fms = (folder.parent / "B738.a_fms/B738.a_fms.lua").read_text(encoding="utf-8")
-        assert fms.count("BEGIN LEVELUP_NG_WB FMS_ZFW_OWNER") == 1
+        assert_legacy_blocked(folder)
     finally:
         temporary.cleanup()
 
@@ -617,7 +597,7 @@ def exercise_v05x_upgrade(version: str) -> None:
     try:
         with zipfile.ZipFile(archive_path) as archive:
             archive.extractall(folder)
-        assert f"Installed v{version}" in run(folder).stdout
+        assert f"Installed v{version}" in run_legacy(folder).stdout
         tablet = folder / "B738.tablet.lua"
         fms = folder.parent / "B738.a_fms/B738.a_fms.lua"
         source_hashes = (digest(tablet), digest(fms))
@@ -628,20 +608,7 @@ def exercise_v05x_upgrade(version: str) -> None:
         for name in FILES:
             (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(PACKAGE / name, folder / name)
-        upgraded = run(folder).stdout
-        assert "Verified package payload: v0.5.3" in upgraded
-        assert "Installed v0.5.3" in upgraded
-        assert source_hashes[0] != digest(tablet), "Tablet anchors gain unambiguous comments"
-        assert source_hashes[1] != digest(fms), "FMS now has a compatibility gate and reload reset"
-        source_hashes = (digest(tablet), digest(fms))
-        assert (folder / "B738.tablet_levelup_ng_wb_data.lua").read_bytes() == (PACKAGE / "B738.tablet_levelup_ng_wb_data.lua").read_bytes()
-        run(folder)
-        assert source_hashes == (digest(tablet), digest(fms)), "idempotent upgrade"
-        assert acf_hashes == {p.name: digest(p) for p in aircraft.glob("*.acf")}
-        run(folder, "--uninstall")
-        assert b"BEGIN LEVELUP_NG_WB" not in tablet.read_bytes()
-        assert b"BEGIN UPSTREAM_TABLET_PERF_CALC" in tablet.read_bytes()
-        assert b"BEGIN LEVELUP_VNAV_DESCENT_TABLES" in fms.read_bytes()
+        assert_legacy_blocked(folder)
     finally:
         temporary.cleanup()
 
@@ -670,4 +637,4 @@ exercise_wrong_acf("737_70NG.acf", "levelup-ng-wb-layout-v1")
 exercise_wrong_acf("737_80NG.acf", "levelup-ng-wb-layout-v1")
 exercise_wrong_acf("737_90NG.acf", "levelup-ng-wb-layout-v1")
 exercise_wrong_acf("737_9ENG.acf", "levelup-ng-wb-layout-v1")
-print("PASS: Lua 5.1 compiler selection, Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy migration, five ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")
+print("PASS: Lua 5.1 compiler selection, Windows luac handoff, Tablet/FMS .35 anchors, physical ZFW oracle, legacy refusal, five ACF contracts, LF/CRLF, idempotence, uninstall and patch coexistence")

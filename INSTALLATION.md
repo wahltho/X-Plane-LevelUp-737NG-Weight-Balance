@@ -21,63 +21,25 @@ of its Galley F/A roles are both accepted.
 
 ## Install or upgrade
 
-1. Close X-Plane.
-2. Back up the LevelUp test aircraft.
-3. Open `plugins/xlua/scripts/B738.tablet/` in the LevelUp aircraft folder.
-4. Extract every file from
-   `LevelUp-737NG-Weight-Balance-v0.5.3.zip` directly into that folder. Do not
-   create another subfolder.
-5. Run one of:
-
-   ```text
-   py z_Install_LevelUp_NG_WB.py
-   python z_Install_LevelUp_NG_WB.py
-   python3 z_Install_LevelUp_NG_WB.py
-   ```
-
-The installer must report:
-
-- package payload `v0.5.3` verified;
-- all five ACF contracts verified;
-- Lua syntax passed when a Lua 5.1-compatible `luac` is available, or skipped
-  with an informational message for incompatible system compilers;
-- LevelUp 737NG W&B hooks installed.
-
-When upgrading from 0.5.0, 0.5.1 or 0.5.2, extract the complete 0.5.3 ZIP
-and run the installer. The FMS blocks now include the shared ACF predicate and
-a flight_start cache reset. Tablet hook positions remain unchanged. A subsequent
-run reports `hooks are already in the requested state`. Restart X-Plane.
-Running an old installer alone does not update the runtime modules.
-
-For an aircraft root outside the normal four-parent layout, use:
+Close X-Plane and extract the complete ZIP outside the aircraft directory.
+Do not pre-copy the Lua modules into the Tablet folder. From the package, run:
 
 ```text
-python3 z_Install_LevelUp_NG_WB.py --aircraft-root "/path/to/LU 737NG Series"
+python3 z_Install_LevelUp_NG_WB.py --aircraft-root "/path/to/LevelUp aircraft"
 ```
 
-A fresh install creates `B738.tablet.lua.levelupngwb.backup` and sibling
-`B738.a_fms.lua.levelupngwb.backup` files once. An upgrade
-from the -700-only v0.1.x package keeps
-`B738.tablet.lua.levelup700wb.backup` unchanged and migrates the old five
-marked blocks. Do not uninstall v0.1.4 first. A full X-Plane restart is
-required after installing or upgrading.
+On Windows use `py -3`. Python 3.10 or newer is required. The installer checks
+package hashes, all five aircraft contracts and the affected Lua layout before
+changing files. It saves originals and its own installation receipt. Repeat the
+command to update an installation that has this receipt, then restart X-Plane.
 
-For an existing v0.2.0 through v0.4.2 installation, extract v0.5.3 over
-the same Tablet folder and run the installer normally. Do not uninstall first.
-The five common Tablet hooks are unchanged. The installer adds three marked
-blocks to the sibling `B738.a_fms/B738.a_fms.lua` and verifies all five current
-ACF contracts. Existing marked VNAV descent-table and Tablet performance
-patches are preserved.
+Older standalone installs without a receipt must first be removed with their
+original installer and backups. Do not copy new runtime files over them or
+delete their backup files to bypass the check. Manual installs and installations
+owned by MTK are not automatically adopted.
 
-The v0.2.3 Windows `luac.exe` temporary-file fix remains included.
-
-Release v0.4.2 additionally ignores Lua 5.2 through 5.4 system compilers for
-whole-file validation because the embedded Zibo Lua targets XLua/LuaJIT 5.1
-semantics. Patch anchors and ACF contracts are still validated normally.
-
-The installer tolerates other marked compatibility patches and both LF and
-CRLF line endings. It refuses an unsupported stock Tablet structure or a
-malformed W&B layout/value rather than guessing a source edit.
+Other correctly installed patches and unrelated Lua edits are preserved. Mixed
+line endings, unknown W&B blocks or changed payloads block the operation.
 
 ## Capacity boundary
 
@@ -100,16 +62,16 @@ the complete target instead of silently dropping cabin crew or catering mass.
 
 ## Remove
 
-Close X-Plane and run from the same Tablet folder:
+Close X-Plane and run from the extracted package:
 
 ```text
-python3 z_Install_LevelUp_NG_WB.py --uninstall
+python3 z_Install_LevelUp_NG_WB.py --aircraft-root "/path/to/LevelUp aircraft" --uninstall
 ```
 
-This removes only the five common Tablet W&B blocks and the three FMS W&B blocks,
-then restores the stock payload gates and stock FMS ZFW formula. It preserves
-other compatibility patches and all backup files. Package files can then be
-deleted manually.
+This removes the recorded Tablet/FMS W&B hooks, restores the payload gates and
+ZFW formula, and restores or removes companion files according to their original
+state. Other patches are preserved. Keep the receipt and backups if removal is
+blocked; do not delete them by hand.
 
 ## First simulator evidence
 
@@ -117,3 +79,26 @@ Follow `RUNTIME_TEST_PLAN.md`. At minimum record all nine `m_stations`,
 `m_fixed`, three fuel tanks, X-Plane current/ZFW offsets and `%MAC`, EFB
 current/ZFW/TOW/LW CG, `calc_to_cg`, FMC CG and takeoff trim. Matching displays
 alone are not proof that station and fuel ownership agree.
+
+## Installation ownership
+
+MTK and the standalone installer remain separate supported installation methods.
+Use the same owner for updates and removal. To switch, uninstall through the
+current owner first, then install through the other. Neither installer adopts
+already patched files on the strength of matching hashes alone.
+
+Keep the complete extracted package, including `standalone_guard.py` and
+`standalone-ownership.json`. The standalone installer checks its recorded
+original backups and stops if MTK owns this patch or a shared target file.
+Unknown, duplicate or incomplete patch blocks and unowned companion files also
+block the operation. Other correctly installed patches are preserved.
+
+A failed operation restores the bytes it changed. If the process is interrupted,
+keep the `.patch-ownership` receipt, transaction journal and lock, together with
+any older patch backup/state directory. Do not delete them to retry. Ask for
+support before changing those files.
+
+Older standalone installs without a complete receipt are not automatically
+migrated. Remove them using the installer and original backups that created
+them. This source change affects installation checks only; runtime payloads and
+patch versions are unchanged. Installer and recovery tests cover these checks.

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from standalone_guard import Guard, safe
 import hashlib
 import json
 import math
@@ -20,7 +21,8 @@ TABLET_BACKUP_FILE = Path("B738.tablet.lua.levelupngwb.backup")
 LEGACY_BACKUP_FILE = Path("B738.tablet.lua.levelup700wb.backup")
 FMS_LUA_FILE = Path("../B738.a_fms/B738.a_fms.lua")
 FMS_BACKUP_FILE = Path("../B738.a_fms/B738.a_fms.lua.levelupngwb.backup")
-MANIFEST_FILE = Path("levelup-ng-wb-package-manifest.txt")
+PACKAGE_ROOT = Path(__file__).resolve().parent
+MANIFEST_FILE = PACKAGE_ROOT / "levelup-ng-wb-package-manifest.txt"
 PACKAGE_ID = "levelup-737ng-weight-balance-test-balloon"
 
 
@@ -142,11 +144,12 @@ def verify_package() -> str:
         raise SystemExit(2)
 
     required = (*PAYLOADS, *FRAGMENTS, Path("z_Install_LevelUp_NG_WB.py"),
-                Path("contracts/levelup-ng-wb-acf-v0.5.3.json"))
+                Path("contracts/levelup-ng-wb-acf-v0.5.3.json"), Path("standalone_guard.py"), Path("standalone-ownership.json"))
     for path in required:
-        require(path)
+        source = PACKAGE_ROOT / path
+        require(source)
         expected = payloads.get(path.as_posix())
-        if expected is None or len(path.read_bytes()) != expected[0] or sha256(path) != expected[1]:
+        if expected is None or len(source.read_bytes()) != expected[0] or sha256(source) != expected[1]:
             print(f"ERROR: {path.name} does not match package {version}.", file=sys.stderr)
             raise SystemExit(2)
     print(f"Verified package payload: {version}")
@@ -468,81 +471,48 @@ def patch_fms(lines: list[str], uninstall: bool, fragments: dict[str, list[str]]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uninstall", action="store_true")
-    parser.add_argument("--aircraft-root", type=Path, help="LevelUp aircraft root containing the supported ACFs")
+    parser.add_argument("--aircraft-root", type=Path, help="LevelUp aircraft root; run from the extracted package")
     args = parser.parse_args()
-
-    require(TABLET_LUA_FILE)
-    require(FMS_LUA_FILE)
-    version = ""
-    if not args.uninstall:
-        version = verify_package()
-        aircraft_root = args.aircraft_root or default_aircraft_root()
-        for contract in ACF_CONTRACTS:
-            verify_acf(aircraft_root / str(contract["name"]), contract)
-
-    tablet_original = TABLET_LUA_FILE.read_bytes()
-    tablet_lines, tablet_eol, tablet_final_eol = split_lines(tablet_original)
-    fms_original = FMS_LUA_FILE.read_bytes()
-    fms_lines, fms_eol, fms_final_eol = split_lines(fms_original)
-    fragments = {
-        DOFILE_BEGIN: read_fragment(Path("Add_levelup_ng_wb_dofile.txt")),
-        INSTALL_BEGIN: read_fragment(Path("Add_levelup_ng_wb_install_hook.txt")),
-        EXTERNAL_BEGIN: read_fragment(Path("Replace_external_payload_gate.txt")),
-        INTERNAL_BEGIN: read_fragment(Path("Replace_internal_payload_gate.txt")),
-        TOTAL_BEGIN: read_fragment(Path("Replace_total_payload_scalar_gate.txt")),
-        FMS_RESET_BEGIN: read_fragment(Path("Add_levelup_ng_wb_fms_reset.txt")),
-        FMS_EMPTY_BEGIN: read_fragment(Path("Add_levelup_ng_wb_fms_empty_weight.txt")),
-        FMS_ZFW_BEGIN: read_fragment(Path("Replace_levelup_ng_wb_fms_zfw_owner.txt")),
-    }
-
-    tablet_changed = patch_tablet(tablet_lines, args.uninstall, fragments)
-    fms_changed = patch_fms(fms_lines, args.uninstall, fragments)
-
-    if not tablet_changed and not fms_changed:
-        print("LevelUp 737NG W&B hooks are already in the requested state.")
-        return 0
-
-    tablet_modified = encode_lines(tablet_lines, tablet_eol, tablet_final_eol)
-    fms_modified = encode_lines(fms_lines, fms_eol, fms_final_eol)
-    if tablet_changed:
-        validate_lua(tablet_modified, TABLET_LUA_FILE.name)
-    if fms_changed:
-        validate_lua(fms_modified, FMS_LUA_FILE.name)
-
-    if not args.uninstall:
-        if tablet_changed:
-            tablet_backup = LEGACY_BACKUP_FILE if LEGACY_BACKUP_FILE.exists() else TABLET_BACKUP_FILE
-            if not tablet_backup.exists():
-                shutil.copy2(TABLET_LUA_FILE, tablet_backup)
-                print(f"Backup created: {tablet_backup}")
-            else:
-                print(f"Backup already exists, not overwritten: {tablet_backup}")
-        if fms_changed:
-            if not FMS_BACKUP_FILE.exists():
-                shutil.copy2(FMS_LUA_FILE, FMS_BACKUP_FILE)
-                print(f"Backup created: {FMS_BACKUP_FILE}")
-            else:
-                print(f"Backup already exists, not overwritten: {FMS_BACKUP_FILE}")
-
-    written: list[tuple[Path, bytes]] = []
-    try:
-        if tablet_changed:
-            TABLET_LUA_FILE.write_bytes(tablet_modified)
-            written.append((TABLET_LUA_FILE, tablet_original))
-        if fms_changed:
-            FMS_LUA_FILE.write_bytes(fms_modified)
-            written.append((FMS_LUA_FILE, fms_original))
-    except OSError as error:
-        for path, original in reversed(written):
-            path.write_bytes(original)
-        print(f"ERROR: W&B installation rolled back after write failure: {error}", file=sys.stderr)
-        raise SystemExit(1)
-
-    action = "Removed" if args.uninstall else f"Installed {version}"
-    targets = [str(path) for path, changed in ((TABLET_LUA_FILE, tablet_changed), (FMS_LUA_FILE, fms_changed)) if changed]
-    print(f"{action} LevelUp 737NG W&B hooks in {', '.join(targets)}.")
+    cwd = Path.cwd().resolve()
+    root = args.aircraft_root or (cwd.parents[3] if cwd.name == "B738.tablet" else cwd)
+    tablet_relative = "plugins/xlua/scripts/B738.tablet/B738.tablet.lua"
+    fms_relative = "plugins/xlua/scripts/B738.a_fms/B738.a_fms.lua"
+    with Guard(root, PACKAGE_ROOT) as guard:
+        version = verify_package() if not args.uninstall else ""
+        if not args.uninstall:
+            for contract in ACF_CONTRACTS:
+                verify_acf(safe(guard.root, str(contract["name"])), contract)
+        tablet_original = safe(guard.root, tablet_relative).read_bytes()
+        tablet_lines, tablet_eol, tablet_final_eol = split_lines(tablet_original)
+        fms_original = safe(guard.root, fms_relative).read_bytes()
+        fms_lines, fms_eol, fms_final_eol = split_lines(fms_original)
+        fragments = {begin: read_fragment(PACKAGE_ROOT / file) for begin, file in (
+            (DOFILE_BEGIN, "Add_levelup_ng_wb_dofile.txt"),
+            (INSTALL_BEGIN, "Add_levelup_ng_wb_install_hook.txt"),
+            (EXTERNAL_BEGIN, "Replace_external_payload_gate.txt"),
+            (INTERNAL_BEGIN, "Replace_internal_payload_gate.txt"),
+            (TOTAL_BEGIN, "Replace_total_payload_scalar_gate.txt"),
+            (FMS_RESET_BEGIN, "Add_levelup_ng_wb_fms_reset.txt"),
+            (FMS_EMPTY_BEGIN, "Add_levelup_ng_wb_fms_empty_weight.txt"),
+            (FMS_ZFW_BEGIN, "Replace_levelup_ng_wb_fms_zfw_owner.txt"))}
+        patch_tablet(tablet_lines, args.uninstall, fragments)
+        patch_fms(fms_lines, args.uninstall, fragments)
+        tablet_modified = encode_lines(tablet_lines, tablet_eol, tablet_final_eol)
+        fms_modified = encode_lines(fms_lines, fms_eol, fms_final_eol)
+        validate_lua(tablet_modified, "B738.tablet.lua")
+        validate_lua(fms_modified, "B738.a_fms.lua")
+        plan = {tablet_relative: tablet_modified, fms_relative: fms_modified}
+        for file in PAYLOADS:
+            target = "plugins/xlua/scripts/B738.tablet/" + file.name
+            plan[target] = guard.original_payload(target) if args.uninstall else (PACKAGE_ROOT / file).read_bytes()
+        guard.apply(plan, uninstall=args.uninstall, version=version)
+    print("Weight & Balance removed." if args.uninstall else "Weight & Balance installed. Restart X-Plane.")
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, KeyError) as error:
+        print("ERROR: " + str(error), file=sys.stderr)
+        raise SystemExit(1)

@@ -6,9 +6,11 @@ import io
 import json
 import tempfile
 from pathlib import Path
+import sys
 from lupa.lua51 import LuaRuntime
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
 spec = importlib.util.spec_from_file_location("installer", ROOT / "z_Install_LevelUp_NG_WB.py")
 installer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(installer)
